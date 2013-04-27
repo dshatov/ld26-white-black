@@ -32,8 +32,9 @@ SubtitlesLayer = cc.Layer.extend({
 
     showText:function(text, gameobject, time) {
         if (gameobject != null) {
+            var replyText = "#^&!$%@";
             this.replyLabel.setOpacity(0);
-            this.replyLabel.setString("#^&!$%@");
+            this.replyLabel.setString(replyText);
             this.replyLabel.setColor(kItemColor);
             var gameobjectPos = cc.pAdd(gameobject.getPosition(), gameobject.getParent().getPosition());
             this.replyLabel.setPosition(gameobjectPos.x,

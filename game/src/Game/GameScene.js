@@ -162,12 +162,34 @@ Game = cc.Layer.extend({
             this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
         }
 
+        var shift = 128.0;
         var cameraPosition = cc.pMult(this.getPosition(), -1);
-        var heroShiftFromCenter = cc.pSub(cc.pSub(this.hero.getPosition(), cameraPosition), kScreenCenter);
-        var heroMaxShiftFromCenter = cc.pMult(cc.pNormalize(heroShiftFromCenter), 128.0);
-        if (cc.pLength(heroMaxShiftFromCenter) < cc.pLength(heroShiftFromCenter)) {
-            this.setPosition(cc.pSub(this.getPosition(), cc.pSub(heroShiftFromCenter, heroMaxShiftFromCenter)));
+        var center = kScreenCenter;
+        var heroPos = cc.pSub(this.hero.getPosition(), cameraPosition);
+        var dt = cc.p(0, 0);
+
+        if (heroPos.x > center.x + shift) {
+            dt.x = (center.x + shift) - heroPos.x;
         }
+        else
+        if (heroPos.x < center.x - shift) {
+            dt.x = (center.x - shift) - heroPos.x;
+        }
+
+        if (heroPos.y > center.y + shift) {
+            dt.y = (center.y + shift) - heroPos.y;
+        }
+        else
+        if (heroPos.y < center.y - shift) {
+            dt.y = (center.y - shift) - heroPos.y;
+        }
+
+//        var heroShiftFromCenter = cc.pSub(cc.pSub(this.hero.getPosition(), cameraPosition), kScreenCenter);
+//        var heroMaxShiftFromCenter = cc.pMult(cc.pNormalize(heroShiftFromCenter), 128.0);
+//        if (cc.pLength(heroMaxShiftFromCenter) < cc.pLength(heroShiftFromCenter)) {
+//            this.setPosition(cc.pSub(this.getPosition(), cc.pSub(heroShiftFromCenter, heroMaxShiftFromCenter)));
+//        }
+        this.setPosition(cc.pAdd(this.getPosition(), dt));
         this.background.setPosition(cc.pMult(this.getPosition(), -1));
         this.subtitlesLayer.setPosition(cc.pMult(this.getPosition(), -1));
     }
