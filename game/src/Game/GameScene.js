@@ -12,16 +12,26 @@ const zOrder = {
     background: 0
 };
 
+const Direction = {
+    left:   cc.KEY.left,
+    right:  cc.KEY.right,
+    bottom: cc.KEY.up,
+    top:    cc.KEY.down
+};
+
 var Game;
 Game = cc.Layer.extend({
     fadeLayer:null,
     background:null,
     hero:null,
+    heroDirection:null,
 
     init:function() {
         this._super();
 
         this.setMouseEnabled(true);
+        this.setKeyboardEnabled(true);
+        this.scheduleUpdate();
 
         var fadeLayer = cc.LayerColor.create(kItemColor);
         fadeLayer.setOpacity(0);
@@ -44,9 +54,6 @@ Game = cc.Layer.extend({
     invert:function() {
         const t = 0.5;
 
-        var hero = this.hero;
-        var background = this.background;
-
         this.fadeLayer.setColor(kItemColor);
         this.fadeLayer.runAction(
             cc.Sequence.create(
@@ -54,17 +61,43 @@ Game = cc.Layer.extend({
                 cc.CallFunc.create(function() {
                     invertColors();
 
-                    background.setColor(kBackgroundColor);
-                    hero.setColor(kItemColor);
-                }),
-                cc.DelayTime.create(0.25),
+                    this.background.setColor(kBackgroundColor);
+                    this.hero.setColor(kItemColor);
+                }, this),
+                cc.DelayTime.create(t/2),
                 cc.FadeTo.create(t, 0)
             )
         );
     },
 
     onKeyDown:function(evt) {
+        switch (evt)
+        {
+            case cc.KEY.left:
+            case cc.KEY.right:
+            case cc.KEY.up:
+            case cc.KEY.down: {
+                this.heroDirection = evt;
+            } break;
 
+            default:
+                break;
+        }
+    },
+
+    onKeyUp:function(evt) {
+        switch (evt)
+        {
+            case cc.KEY.left:
+            case cc.KEY.right:
+            case cc.KEY.up:
+            case cc.KEY.down: {
+                this.heroDirection = null;
+            } break;
+
+            default:
+                break;
+        }
     },
 
     onMouseDown:function(mouse) {
@@ -77,6 +110,35 @@ Game = cc.Layer.extend({
     },
 
     update:function(dt) {
+        const heroSpeed = 320.0;
+
+        var d = heroSpeed*dt;
+        var dp = null;
+        switch (this.heroDirection)
+        {
+            case Direction.left: {
+                dp = cc.p(-d, 0);
+            } break;
+
+            case Direction.right: {
+                dp = cc.p(d, 0);
+            } break;
+
+            case Direction.bottom: {
+                dp = cc.p(0, d);
+            } break;
+
+            case Direction.top: {
+                dp = cc.p(0, -d);
+            } break;
+
+            default:
+                break;
+        }
+
+        if (dp != null) {
+            this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
+        }
     }
 });
 
