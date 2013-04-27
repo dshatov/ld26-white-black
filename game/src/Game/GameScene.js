@@ -28,6 +28,11 @@ Game = cc.Layer.extend({
     background:null,
     hero:null,
     heroDirection:null,
+    _heroOffset: 0,
+    heroIntPosition: {
+        x: 0,
+        y: 0
+    },
     subtitlesLayer:null,
     controlsBlocked:false,
 
@@ -35,7 +40,8 @@ Game = cc.Layer.extend({
         this._super();
 
         DynamicHell.createMap(64, 64);
-        DynamicHell.generate(0, 0, 24, 3);
+
+        DynamicHell.generate(0, 0, 64, 3);
         //DynamicHell.getListOfSegments()
 
         this.setMouseEnabled(true);
@@ -60,6 +66,10 @@ Game = cc.Layer.extend({
         var hero = GameObject.create(GameObject.type_foursquare);
         hero.setColor(kItemColor);
         hero.setPosition(0, 0);
+
+        this.heroIntPosition.x = 0;
+        this.heroIntPosition.y = 0;
+
         this.addChild(hero, zOrder.hero);
         this.hero = hero;
 
@@ -296,6 +306,49 @@ Game = cc.Layer.extend({
         }
     },
 
+    calculateHeroOffset: function() {
+        var nearPoints = DynamicHell._map[this.heroIntPosition.x][this.heroIntPosition.y];
+
+        var result = Math.sqrt(Math.pow(this.heroIntPosition.x * levelScale - this.hero.getPositionX(), 2) +
+            Math.pow(this.heroIntPosition.y * levelScale - this.hero.getPositionY(), 2));
+
+        if(nearPoints.length == 0)
+            return result;
+
+        var minNear = 3 * levelScale;
+        var nearI = -1;
+        for(var i = 0; i < nearPoints.length; i++) {
+            var curNear = Math.sqrt(Math.pow(nearPoints[i].x * levelScale - this.hero.getPositionX(), 2) +
+                Math.pow(nearPoints[i].y * levelScale - this.hero.getPositionY(), 2));
+            if(curNear < minNear) {
+                minNear = curNear;
+                nearI = i;
+            }
+        }
+
+
+        if(i >= 0)
+        {
+            if(nearPoints[nearI].x != this.heroIntPosition.x){
+                var arr = [];
+                arr.push(nearPoints[nearI].x * levelScale);
+                arr.push(this.heroIntPosition.x * levelScale);
+                if(Math.min(arr[0], arr[1]) <= this.hero.getPositionX())
+                    if(Math.max(arr[0], arr[1]) >= this.hero.getPositionX())
+                        result = Math.abs(this.heroIntPosition.y * levelScale - this.hero.getPositionY());
+            }
+            else if(nearPoints[nearI].y != this.heroIntPosition.y){
+                var arr = [];
+                arr.push(nearPoints[nearI].y * levelScale);
+                arr.push(this.heroIntPosition.y * levelScale);
+                if(Math.min(arr[0], arr[1]) <= this.hero.getPositionY())
+                    if(Math.max(arr[0], arr[1]) >= this.hero.getPositionY())
+                        result = Math.abs(this.heroIntPosition.x * levelScale - this.hero.getPositionX());
+            }
+        }
+        return result;
+    },
+
     update:function(dt) {
         const heroSpeed = 320.0;
 
@@ -326,6 +379,11 @@ Game = cc.Layer.extend({
 
             if (dp != null) {
                 this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
+                this.heroIntPosition.x = Math.round(this.hero.getPositionX() / levelScale);
+                this.heroIntPosition.y = Math.round(this.hero.getPositionY() / levelScale);
+
+
+
             }
         }
 
