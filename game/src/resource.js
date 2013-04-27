@@ -8,6 +8,12 @@ var s_foursquare_black = "res/foursquare_black.png";
 var s_circle_white = "res/circle_white.png";
 var s_cirlce_black = "res/circle_black.png";
 
+var e_voice_foursquare = "res/voice_foursquare.mp3";
+var e_voice_circle = "res/voice_circle.mp3";
+var e_voice_triangle = "res/voice_triangle.mp3";
+
+var m_theme = "res/theme.mp3";
+
 var g_ressources = [
     //image
     {type:"image", src:s_foursquare_white},
@@ -25,6 +31,10 @@ var g_ressources = [
     //tmx
 
     //bgm
+    {type:"sound", src:m_theme},
 
     //effect
+    {type:"sound", src:e_voice_foursquare},
+    {type:"sound", src:e_voice_triangle},
+    {type:"sound", src:e_voice_circle},
 ];

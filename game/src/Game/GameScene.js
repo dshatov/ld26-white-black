@@ -67,10 +67,12 @@ Game = cc.Layer.extend({
         circle.setColor(kItemColor);
         circle.setPosition(kScreenCenter);
         this.addChild(circle);
-        this.circle = circle;
+//        this.circle = circle;
 
         this.initMapDebugDraw();
         this.initSmallMapDebugDraw();
+
+        this.heroPulse();
 
         return true;
     },
@@ -91,8 +93,6 @@ Game = cc.Layer.extend({
                 cc.drawingUtil.drawLine(cc.p(seg.first.x*levelScale, seg.first.y*levelScale),
                                         cc.p(seg.last.x*levelScale, seg.last.y*levelScale));
             }
-
-//            context.globalAlpha = 1.0;
         }
     },
 
@@ -101,6 +101,7 @@ Game = cc.Layer.extend({
         smallmap.setPosition(0, kScreenHeight/2);
         this.addChild(smallmap, 10);
 
+        var hero = this.hero;
         smallmap.draw = function(ctx) {
             var context = ctx != null ? ctx : cc.renderContext;
             context.strokeStyle = "rgba(0,0,255,255)";
@@ -114,25 +115,32 @@ Game = cc.Layer.extend({
                     cc.p(seg.last.x*8, seg.last.y*8));
             }
 
+            var x = Math.round((hero.getPosition().x/levelScale)*8.0);
+            var y = Math.round((hero.getPosition().y/levelScale)*8.0);
+            context.lineWidth = 4;
+            context.strokeStyle = "rgba(255,0,0,255)";
+            cc.drawingUtil.drawPoint(cc.p(x, y));
+
+
 //            context.globalAlpha = 1.0;
         }
 
         this.smallmap = smallmap;
     },
 
-    draw:function(ctx) {
-//        var context = ctx != null ? ctx : cc.renderContext;
-//        context.strokeStyle = "rgba(100,100,100,255)";
-//
-//        var screenSize = cc.size(4096, 4096);
-//        for (var x = -kScreenWidth/2; x <= screenSize.width; x += 64.0) {
-//            for (var y = -kScreenHeight/2; y <= screenSize.height; y += 64.0) {
-//                cc.drawingUtil.drawPoint(cc.p(x, y));
-//            }
-//        }
+    heroPulse:function() {
+        var t = 2.0;
+        this.hero.runAction(
+            cc.Sequence.create(
+                cc.ScaleTo.create(t/2, 1.2),
+                cc.EaseBounceOut.create(cc.ScaleTo.create(t/2, 1.0)),
+                cc.DelayTime.create(t/2),
+                cc.CallFunc.create(this.heroPulse, this)
+            )
+        );
     },
 
-    invert:function() {
+    restart:function() {
         const t = 0.5;
 
         this.fadeLayer.setColor(kItemColor);
@@ -149,6 +157,38 @@ Game = cc.Layer.extend({
                             child.setColor(kItemColor);
                         }
                     }
+
+                    DynamicHell.generate(0, 0, 24, 3);
+                    this.hero.setPosition(0, 0);
+                }, this),
+                cc.DelayTime.create(t/2),
+                cc.FadeTo.create(t, 0)
+            )
+        );
+    },
+
+    die:function() {
+        const t = 0.5;
+
+        this.fadeLayer.setColor(kItemColor);
+        this.fadeLayer.runAction(
+            cc.Sequence.create(
+                cc.FadeTo.create(t, 255),
+                cc.CallFunc.create(function() {
+                    invertColors();
+
+                    this.background.setColor(kBackgroundColor);
+                    for (var i = 0; i < this.getChildrenCount(); i++) {
+                        var child = this.getChildren()[i];
+                        if (child instanceof GameObject) {
+                            child.setColor(kItemColor);
+                        }
+                    }
+
+                    DynamicHell.generate(0, 0, 24, 3);
+                    this.hero.setPosition(0, 0);
+
+                    // drop progress here
                 }, this),
                 cc.DelayTime.create(t/2),
                 cc.FadeTo.create(t, 0)
@@ -164,6 +204,18 @@ Game = cc.Layer.extend({
             case cc.KEY.up:
             case cc.KEY.down: {
                 this.heroDirection = evt;
+            } break;
+
+            case cc.KEY.r: { // restart
+                this.restart();
+            } break;
+
+            case cc.KEY.q: { // exit to main menu
+                ccDirector.replaceScene(
+                    cc.TransitionFade.create(
+                        1.0, MainMenu.create(), kBackgroundColor
+                    )
+                );
             } break;
 
             default:
@@ -188,7 +240,7 @@ Game = cc.Layer.extend({
 
     onMouseDown:function(mouse) {
 //        var location = mouse.getLocation();
-        this.invert();
+//        this.invert();
 //        this.subtitlesLayer.showText("hello subtitles!", this.circle, 2.0);
     },
 
@@ -275,7 +327,7 @@ Game = cc.Layer.extend({
             }
 
             const maxVisibilityDistance = 372.0;
-            const fullVisibilityDistance = 256.0;
+            const fullVisibilityDistance = 128.0;
             if (child instanceof GameObject && child.isActive) {
                 var distance = cc.pLength(cc.pSub(this.hero.getPosition(), child.getPosition()));
                 if (distance - fullVisibilityDistance >= maxVisibilityDistance) {

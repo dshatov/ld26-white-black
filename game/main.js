@@ -63,6 +63,7 @@ cocos2dApp = cc.Application.extend({
         cc.Loader.getInstance().onloading = function () {
             cc.LoaderScene.getInstance().draw();
         };
+        cc.AudioEngine.getInstance().init("mp3,ogg,wav");
         cc.Loader.getInstance().onload = function () {
             cc.AppController.shareAppController().didFinishLaunchingWithOptions();
         };
@@ -80,9 +81,9 @@ cocos2dApp = cc.Application.extend({
         kScreenCenter = cc.p(kScreenWidth/2, kScreenHeight/2);
 
         // global colors
-        if (randomIntBetween(0, 1) == 0) {
-            invertColors();
-        }
+//        if (randomIntBetween(0, 1) == 0) {
+//            invertColors();
+//        }
 
         // enable High Resource Mode(2x, such as iphone4) and maintains low resource on other devices.
 //     director->enableRetinaDisplay(true);
@@ -96,6 +97,7 @@ cocos2dApp = cc.Application.extend({
         // create a scene. it's an autorelease object
 
         // run
+        cc.AudioEngine.getInstance().playMusic(m_theme, true);
         director.runWithScene(
             cc.TransitionFade.create(
                 1.0, this.startScene.create(), kBackgroundColor
