@@ -5,10 +5,15 @@
 var s_foursquare_white = "res/foursquare_white.png";
 var s_foursquare_black = "res/foursquare_black.png";
 
+var s_circle_white = "res/circle_white.png";
+var s_cirlce_black = "res/circle_black.png";
+
 var g_ressources = [
     //image
     {type:"image", src:s_foursquare_white},
     {type:"image", src:s_foursquare_black},
+    {type:"image", src:s_circle_white},
+    {type:"image", src:s_cirlce_black},
 //    {type:"image", src:s_HelloWorld},
 //    {type:"image", src:s_CloseNormal},
 //    {type:"image", src:s_CloseSelected}

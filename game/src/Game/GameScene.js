@@ -55,6 +55,11 @@ Game = cc.Layer.extend({
         this.addChild(hero, zOrder.hero);
         this.hero = hero;
 
+        var circle = GameObject.create(GameObject.type_circle);
+        circle.setColor(kItemColor);
+        circle.setPosition(kScreenWidth, kScreenHeight);
+        this.addChild(circle);
+        this.circle = circle;
 
 
         return true;
@@ -83,7 +88,12 @@ Game = cc.Layer.extend({
                     invertColors();
 
                     this.background.setColor(kBackgroundColor);
-                    this.hero.setColor(kItemColor);
+                    for (var i = 0; i < this.getChildrenCount(); i++) {
+                        var child = this.getChildren()[i];
+                        if (child instanceof GameObject) {
+                            child.setColor(kItemColor);
+                        }
+                    }
                 }, this),
                 cc.DelayTime.create(t/2),
                 cc.FadeTo.create(t, 0)
@@ -123,8 +133,8 @@ Game = cc.Layer.extend({
 
     onMouseDown:function(mouse) {
 //        var location = mouse.getLocation();
-//        this.invert();
-        this.subtitlesLayer.showText("hello subtitles!", this.hero, 2.0);
+        this.invert();
+//        this.subtitlesLayer.showText("hello subtitles!", this.circle, 2.0);
     },
 
     reset:function() {
@@ -160,6 +170,15 @@ Game = cc.Layer.extend({
 
         if (dp != null) {
             this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
+        }
+
+        for (var i = 0; i < this.getChildrenCount(); i++) {
+            var child = this.getChildren()[i];
+            if (child == this.hero) {
+                continue;
+            }
+
+            
         }
 
         var shift = 128.0;

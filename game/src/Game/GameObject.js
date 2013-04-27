@@ -21,11 +21,35 @@ GameObject = cc.Node.extend({
 
         this.type = type;
 
-        var black = cc.Sprite.create(s_foursquare_black);
+        var s_black = null;
+        var s_white = null;
+        switch (this.type)
+        {
+            case GameObject.type_foursquare: {
+                s_black = s_foursquare_black;
+                s_white = s_foursquare_white;
+            } break;
+
+            case GameObject.type_triangle: {
+                s_black = s_foursquare_black;
+                s_white = s_foursquare_white;
+            } break;
+
+            case GameObject.type_circle: {
+                s_black = s_cirlce_black;
+                s_white = s_circle_white;
+            } break;
+
+            default:
+                cc.Assert(null, "");
+                break;
+        }
+
+        var black = cc.Sprite.create(s_black);
         this.addChild(black);
         this.black = black;
 
-        var white = cc.Sprite.create(s_foursquare_white);
+        var white = cc.Sprite.create(s_white);
         this.addChild(white);
         this.white = white;
 
