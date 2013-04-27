@@ -70,15 +70,15 @@ Game = cc.Layer.extend({
     },
 
     draw:function(ctx) {
-        var context = ctx != null ? ctx : cc.renderContext;
-        context.strokeStyle = "rgba(100,100,100,255)";
-
-        var screenSize = cc.size(4096, 4096);
-        for (var x = -kScreenWidth/2; x <= screenSize.width; x += 64.0) {
-            for (var y = -kScreenHeight/2; y <= screenSize.height; y += 64.0) {
-                cc.drawingUtil.drawPoint(cc.p(x, y));
-            }
-        }
+//        var context = ctx != null ? ctx : cc.renderContext;
+//        context.strokeStyle = "rgba(100,100,100,255)";
+//
+//        var screenSize = cc.size(4096, 4096);
+//        for (var x = -kScreenWidth/2; x <= screenSize.width; x += 64.0) {
+//            for (var y = -kScreenHeight/2; y <= screenSize.height; y += 64.0) {
+//                cc.drawingUtil.drawPoint(cc.p(x, y));
+//            }
+//        }
     },
 
     invert:function() {
