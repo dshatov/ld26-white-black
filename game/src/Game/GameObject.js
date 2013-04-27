@@ -21,6 +21,8 @@ GameObject = cc.Node.extend({
         this.addChild(white);
         this.white = white;
 
+        this.setContentSize(this.white.getContentSize());
+
         this.setColor(kColorWhite);
     },
 

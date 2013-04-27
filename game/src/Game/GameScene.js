@@ -7,8 +7,9 @@
  */
 
 const zOrder = {
-    fadeLayer:  2,
-    hero:       1,
+    fadeLayer: 3,
+    subtitlesLayer: 2,
+    hero: 1,
     background: 0
 };
 
@@ -25,6 +26,7 @@ Game = cc.Layer.extend({
     background:null,
     hero:null,
     heroDirection:null,
+    subtitlesLayer:null,
 
     init:function() {
         this._super();
@@ -33,10 +35,15 @@ Game = cc.Layer.extend({
         this.setKeyboardEnabled(true);
         this.scheduleUpdate();
 
-        var fadeLayer = cc.LayerColor.create(kItemColor);
+        var fadeLayer = cc.LayerColor.create(kItemColor, 4096, 4096);
         fadeLayer.setOpacity(0);
+        fadeLayer.setScale(2);
         this.addChild(fadeLayer, zOrder.fadeLayer);
         this.fadeLayer = fadeLayer;
+
+        var subtitlesLayer = SubtitlesLayer.create();
+        this.addChild(subtitlesLayer, zOrder.subtitlesLayer);
+        this.subtitlesLayer = subtitlesLayer;
 
         var background = cc.LayerColor.create(kBackgroundColor);
         this.addChild(background, zOrder.background);
@@ -48,7 +55,21 @@ Game = cc.Layer.extend({
         this.addChild(hero, zOrder.hero);
         this.hero = hero;
 
+
+
         return true;
+    },
+
+    draw:function(ctx) {
+        var context = ctx != null ? ctx : cc.renderContext;
+        context.strokeStyle = "rgba(100,100,100,255)";
+
+        var screenSize = cc.size(4096, 4096);
+        for (var x = -kScreenWidth/2; x <= screenSize.width; x += 64.0) {
+            for (var y = -kScreenHeight/2; y <= screenSize.height; y += 64.0) {
+                cc.drawingUtil.drawPoint(cc.p(x, y));
+            }
+        }
     },
 
     invert:function() {
@@ -102,7 +123,8 @@ Game = cc.Layer.extend({
 
     onMouseDown:function(mouse) {
 //        var location = mouse.getLocation();
-        this.invert();
+//        this.invert();
+        this.subtitlesLayer.showText("hello subtitles!", this.hero, 2.0);
     },
 
     reset:function() {
@@ -139,6 +161,15 @@ Game = cc.Layer.extend({
         if (dp != null) {
             this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
         }
+
+        var cameraPosition = cc.pMult(this.getPosition(), -1);
+        var heroShiftFromCenter = cc.pSub(cc.pSub(this.hero.getPosition(), cameraPosition), kScreenCenter);
+        var heroMaxShiftFromCenter = cc.pMult(cc.pNormalize(heroShiftFromCenter), 128.0);
+        if (cc.pLength(heroMaxShiftFromCenter) < cc.pLength(heroShiftFromCenter)) {
+            this.setPosition(cc.pSub(this.getPosition(), cc.pSub(heroShiftFromCenter, heroMaxShiftFromCenter)));
+        }
+        this.background.setPosition(cc.pMult(this.getPosition(), -1));
+        this.subtitlesLayer.setPosition(cc.pMult(this.getPosition(), -1));
     }
 });
 

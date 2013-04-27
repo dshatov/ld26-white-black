@@ -45,7 +45,8 @@
             // game
             'src/Game/GameConfig.js',
             'src/Game/GameScene.js',
-            'src/Game/GameObject.js'
+            'src/Game/GameObject.js',
+            'src/Game/SubtitlesLayer.js',
         ]
     };
     window.addEventListener('DOMContentLoaded', function () {
