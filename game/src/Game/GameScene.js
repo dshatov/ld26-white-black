@@ -20,6 +20,8 @@ const Direction = {
     top:    cc.KEY.down
 };
 
+const levelScale = 512.0;
+
 var Game;
 Game = cc.Layer.extend({
     fadeLayer:null,
@@ -27,17 +29,20 @@ Game = cc.Layer.extend({
     hero:null,
     heroDirection:null,
     subtitlesLayer:null,
+    controlsBlocked:false,
 
     init:function() {
         this._super();
 
-        DynamicHell.createMap(64, 64);
+        DynamicHell.createMap(128, 128);
         DynamicHell.generate(0, 0, 24);
         //DynamicHell.getListOfSegments()
 
         this.setMouseEnabled(true);
         this.setKeyboardEnabled(true);
         this.scheduleUpdate();
+
+        this.controlsBlocked = false;
 
         var fadeLayer = cc.LayerColor.create(kItemColor);
         fadeLayer.setOpacity(0);
@@ -54,18 +59,65 @@ Game = cc.Layer.extend({
 
         var hero = GameObject.create(GameObject.type_foursquare);
         hero.setColor(kItemColor);
-        hero.setPosition(kScreenCenter);
+        hero.setPosition(0, 0);
         this.addChild(hero, zOrder.hero);
         this.hero = hero;
 
         var circle = GameObject.create(GameObject.type_circle);
         circle.setColor(kItemColor);
-        circle.setPosition(kScreenWidth, kScreenHeight);
+        circle.setPosition(kScreenCenter);
         this.addChild(circle);
         this.circle = circle;
 
+        this.initMapDebugDraw();
+        this.initSmallMapDebugDraw();
 
         return true;
+    },
+
+    initMapDebugDraw:function() {
+        var gridNode = new cc.Node.create();
+        this.addChild(gridNode, 10);
+
+        gridNode.draw = function(ctx) {
+            var context = ctx != null ? ctx : cc.renderContext;
+            context.strokeStyle = "rgba(255,0,0,255)";
+            context.lineWidth = 2;
+//            context.globalAlpha = 0.25;
+
+            var segments = DynamicHell.getListOfSegments();
+            for (var i = 0; i < segments.length; i++) {
+                var seg = segments[i];
+                cc.drawingUtil.drawLine(cc.p(seg.first.x*levelScale, seg.first.y*levelScale),
+                                        cc.p(seg.last.x*levelScale, seg.last.y*levelScale));
+            }
+
+//            context.globalAlpha = 1.0;
+        }
+    },
+
+    initSmallMapDebugDraw:function() {
+        var smallmap = new cc.Node.create();
+        smallmap.setPosition(0, kScreenHeight/2);
+        this.addChild(smallmap, 10);
+
+        smallmap.draw = function(ctx) {
+            var context = ctx != null ? ctx : cc.renderContext;
+            context.strokeStyle = "rgba(0,0,255,255)";
+            context.lineWidth = 2;
+//            context.globalAlpha = 0.25;
+
+            var segments = DynamicHell.getListOfSegments();
+            for (var i = 0; i < segments.length; i++) {
+                var seg = segments[i];
+                cc.drawingUtil.drawLine(cc.p(seg.first.x*8, seg.first.y*8),
+                    cc.p(seg.last.x*8, seg.last.y*8));
+            }
+
+//            context.globalAlpha = 1.0;
+        }
+
+        this.smallmap = smallmap;
     },
 
     draw:function(ctx) {
@@ -146,50 +198,74 @@ Game = cc.Layer.extend({
 
     heroInterractWith:function(other) {
         other.isActive = false;
+        this.controlsBlocked = true;
         if (other.type == GameObject.type_triangle) {
             other.runAction(
                 cc.FadeTo.create(1.0, 0)
             );
+            this.controlsBlocked = false;
         }
         else if (other.type == GameObject.type_circle) {
-            other.runAction(
-                cc.FadeTo.create(1.0, 0)
+            var _this = this;
+            var makeReply = function(text, gameobject, time) {
+                return function() {
+                    _this.subtitlesLayer.showText(text, gameobject, time);
+                }
+            };
+
+            const replyTime = 2.0;
+            this.runAction(
+                cc.Sequence.create(
+                    cc.CallFunc.create(makeReply("(blablabla, Mr. Freeman)", other, replyTime), this),
+                    cc.DelayTime.create(replyTime),
+                    cc.CallFunc.create(makeReply("(what the f*ck?!)", this.hero, replyTime), this),
+                    cc.DelayTime.create(replyTime),
+                    cc.CallFunc.create(function() {
+                        other.runAction(cc.FadeTo.create(1.0, 0));
+                    }),
+                    cc.CallFunc.create(function() {
+                        this.controlsBlocked = false;
+                    }, this)
+                )
             );
         }
         else {
             cc.log("holy sh*t!");
+            this.controlsBlocked = false;
         }
     },
 
     update:function(dt) {
         const heroSpeed = 320.0;
 
-        var d = heroSpeed*dt;
-        var dp = null;
-        switch (this.heroDirection)
-        {
-            case Direction.left: {
-                dp = cc.p(-d, 0);
-            } break;
+        if (this.controlsBlocked == false) {
+            var d = heroSpeed*dt;
+            var dp = null;
+            switch (this.heroDirection)
+            {
+                case Direction.left: {
+                    dp = cc.p(-d, 0);
+                } break;
 
-            case Direction.right: {
-                dp = cc.p(d, 0);
-            } break;
+                case Direction.right: {
+                    dp = cc.p(d, 0);
+                } break;
 
-            case Direction.bottom: {
-                dp = cc.p(0, d);
-            } break;
+                case Direction.bottom: {
+                    dp = cc.p(0, d);
+                } break;
 
-            case Direction.top: {
-                dp = cc.p(0, -d);
-            } break;
+                case Direction.top: {
+                    dp = cc.p(0, -d);
+                } break;
 
-            default:
-                break;
-        }
+                default:
+                    break;
+            }
 
-        if (dp != null) {
-            this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
+            if (dp != null) {
+                this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
+            }
         }
 
         for (var i = 0; i < this.getChildrenCount(); i++) {
@@ -246,7 +322,9 @@ Game = cc.Layer.extend({
 //        }
         this.setPosition(cc.pAdd(this.getPosition(), dt));
         this.background.setPosition(cc.pMult(this.getPosition(), -1));
+        this.fadeLayer.setPosition(cc.pMult(this.getPosition(), -1));
         this.subtitlesLayer.setPosition(cc.pMult(this.getPosition(), -1));
+        this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1), cc.p(0, kScreenHeight/2)));
     }
 });
 

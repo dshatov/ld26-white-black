@@ -63,7 +63,7 @@ GameObject = cc.Node.extend({
     setColor:function(color) {
         if (color == kColorBlack) {
             this.black.setVisible(true);
-            this.white.setVisi3ble(false);
+            this.white.setVisible(false);
         }
         else if (color == kColorWhite) {
             this.black.setVisible(false);
@@ -79,6 +79,12 @@ GameObject = cc.Node.extend({
     setOpacity:function(opacity) {
         this.black.setOpacity(opacity);
         this.white.setOpacity(opacity);
+    },
+
+    getOpacity:function() {
+        return this.color == kColorBlack
+               ? this.black.getOpacity()
+               : this.white.getOpacity();
     },
 
     invert:function() {
