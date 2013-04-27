@@ -35,9 +35,8 @@ Game = cc.Layer.extend({
         this.setKeyboardEnabled(true);
         this.scheduleUpdate();
 
-        var fadeLayer = cc.LayerColor.create(kItemColor, 4096, 4096);
+        var fadeLayer = cc.LayerColor.create(kItemColor);
         fadeLayer.setOpacity(0);
-        fadeLayer.setScale(2);
         this.addChild(fadeLayer, zOrder.fadeLayer);
         this.fadeLayer = fadeLayer;
 
@@ -66,15 +65,15 @@ Game = cc.Layer.extend({
     },
 
     draw:function(ctx) {
-        var context = ctx != null ? ctx : cc.renderContext;
-        context.strokeStyle = "rgba(100,100,100,255)";
-
-        var screenSize = cc.size(4096, 4096);
-        for (var x = -kScreenWidth/2; x <= screenSize.width; x += 64.0) {
-            for (var y = -kScreenHeight/2; y <= screenSize.height; y += 64.0) {
-                cc.drawingUtil.drawPoint(cc.p(x, y));
-            }
-        }
+//        var context = ctx != null ? ctx : cc.renderContext;
+//        context.strokeStyle = "rgba(100,100,100,255)";
+//
+//        var screenSize = cc.size(4096, 4096);
+//        for (var x = -kScreenWidth/2; x <= screenSize.width; x += 64.0) {
+//            for (var y = -kScreenHeight/2; y <= screenSize.height; y += 64.0) {
+//                cc.drawingUtil.drawPoint(cc.p(x, y));
+//            }
+//        }
     },
 
     invert:function() {
@@ -141,6 +140,23 @@ Game = cc.Layer.extend({
 
     },
 
+    heroInterractWith:function(other) {
+        other.isActive = false;
+        if (other.type == GameObject.type_triangle) {
+            other.runAction(
+                cc.FadeTo.create(1.0, 0)
+            );
+        }
+        else if (other.type == GameObject.type_circle) {
+            other.runAction(
+                cc.FadeTo.create(1.0, 0)
+            );
+        }
+        else {
+            cc.log("holy sh*t!");
+        }
+    },
+
     update:function(dt) {
         const heroSpeed = 320.0;
 
@@ -178,7 +194,23 @@ Game = cc.Layer.extend({
                 continue;
             }
 
-            
+            const maxVisibilityDistance = 372.0;
+            const fullVisibilityDistance = 256.0;
+            if (child instanceof GameObject && child.isActive) {
+                var distance = cc.pLength(cc.pSub(this.hero.getPosition(), child.getPosition()));
+                if (distance - fullVisibilityDistance >= maxVisibilityDistance) {
+                    child.setOpacity(0);
+                }
+                else if (distance > fullVisibilityDistance) {
+                    var k = (distance - fullVisibilityDistance)/(maxVisibilityDistance);
+                    k = k <= 1 ? k : 1;
+                    child.setOpacity((1 - k)*255);
+                }
+                else {
+                    child.setOpacity(255);
+                    this.heroInterractWith(child);
+                }
+            }
         }
 
         var shift = 128.0;

@@ -12,6 +12,7 @@ GameObject = cc.Node.extend({
     white:null,
     color:null,
     type:null,
+    isActive:null,
 
     init:function(type) {
         cc.Assert(type == GameObject.type_foursquare
@@ -20,6 +21,7 @@ GameObject = cc.Node.extend({
                   "Unknown type");
 
         this.type = type;
+        this.isActive = true;
 
         var s_black = null;
         var s_white = null;
@@ -61,7 +63,7 @@ GameObject = cc.Node.extend({
     setColor:function(color) {
         if (color == kColorBlack) {
             this.black.setVisible(true);
-            this.white.setVisible(false);
+            this.white.setVisi3ble(false);
         }
         else if (color == kColorWhite) {
             this.black.setVisible(false);
