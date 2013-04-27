@@ -37,17 +37,15 @@
         engineDir:'../cocos2d/',
         //SingleEngineFile:'',
         appFiles:[
-            // common
             'src/resource.js',
-
 
             // menu
             'src/Menu/MainMenuScene.js',
 
-
             // game
             'src/Game/GameConfig.js',
             'src/Game/GameScene.js',
+            'src/Game/GameObject.js'
         ]
     };
     window.addEventListener('DOMContentLoaded', function () {
