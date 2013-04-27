@@ -85,6 +85,7 @@ var DynamicHell = {
             else
                 break;
         }
+        return result;
     },
 
     _doWave: function(xF, yF) {
@@ -107,10 +108,15 @@ var DynamicHell = {
         if(steps.length > 0)
         {
             var rnd = 0;
+            var trying = 0;
             do{
                 rnd = Math.floor(Math.random() * steps.length);
-            } while (this.lineLength(xF, yF, steps[rnd].x, steps[rnd].y) > this._maxLineLength);
+                trying++;
+            } while ((this.lineLength(xF, yF, steps[rnd].x, steps[rnd].y) > this._maxLineLength)
+                && (trying < 10));
 
+            if(trying >= 10)
+                return;
 
             this._map[xF][yF].push(steps[rnd]);
             this._map[steps[rnd].x][steps[rnd].y].push({x: xF, y: yF})
