@@ -49,7 +49,7 @@ Game = cc.Layer.extend({
         this.addChild(background, zOrder.background);
         this.background = background;
 
-        var hero = GameObject.create();
+        var hero = GameObject.create(GameObject.type_foursquare);
         hero.setColor(kItemColor);
         hero.setPosition(kScreenCenter);
         this.addChild(hero, zOrder.hero);

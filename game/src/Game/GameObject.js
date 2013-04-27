@@ -11,8 +11,16 @@ GameObject = cc.Node.extend({
     black:null,
     white:null,
     color:null,
+    type:null,
 
-    init:function() {
+    init:function(type) {
+        cc.Assert(type == GameObject.type_foursquare
+                  || type == GameObject.type_triangle
+                  || type == GameObject.type_circle,
+                  "Unknown type");
+
+        this.type = type;
+
         var black = cc.Sprite.create(s_foursquare_black);
         this.addChild(black);
         this.black = black;
@@ -60,8 +68,12 @@ GameObject = cc.Node.extend({
     }
 });
 
-GameObject.create = function() {
+GameObject.create = function(type) {
     var obj = new GameObject();
-    obj.init();
+    obj.init(type);
     return obj;
 }
+
+GameObject.type_foursquare  = 0;
+GameObject.type_triangle    = 1;
+GameObject.type_circle      = 2;
