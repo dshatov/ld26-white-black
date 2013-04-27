@@ -138,6 +138,15 @@ Game = cc.Layer.extend({
                 cc.CallFunc.create(this.heroPulse, this)
             )
         );
+
+        this.hero.runAction(
+            cc.Sequence.create(
+                cc.DelayTime.create(t*0.75),
+                cc.CallFunc.create(function () {
+                    cc.AudioEngine.getInstance().playEffect(e_pulse);
+                })
+            )
+        );
     },
 
     restart:function() {

@@ -11,6 +11,7 @@ var s_cirlce_black = "res/circle_black.png";
 var e_voice_foursquare = "res/voice_foursquare.mp3";
 var e_voice_circle = "res/voice_circle.mp3";
 var e_voice_triangle = "res/voice_triangle.mp3";
+var e_pulse = "res/pulse.mp3";
 
 var m_theme = "res/theme.mp3";
 
@@ -37,4 +38,5 @@ var g_ressources = [
     {type:"sound", src:e_voice_foursquare},
     {type:"sound", src:e_voice_triangle},
     {type:"sound", src:e_voice_circle},
+    {type:"sound", src: e_pulse},
 ];
