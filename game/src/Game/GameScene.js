@@ -40,7 +40,8 @@ Game = cc.Layer.extend({
         this._super();
 
         DynamicHell.createMap(64, 64);
-        DynamicHell.generate(0, 0, 24, 3);
+
+        DynamicHell.generate(0, 0, 64, 3);
         //DynamicHell.getListOfSegments()
 
         this.setMouseEnabled(true);

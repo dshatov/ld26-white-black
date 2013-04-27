@@ -13,21 +13,28 @@ var DynamicHell = {
     _height: 0,
     _mainLength: 0,
     _maxLineLength: 0,
+    _trianglePoint: null,
 
     generate: function(xS, yS, len, lineLen) {
         //xS, yS - точка, откуда строить траекторию
         //len - максимальная длина траектории
-        this.createMap(null, null);
 
-        this._mainLength = len;
-        this._maxLineLength = lineLen;
+        do{
+            this.createMap(null, null);
 
-        if((xS >= 0) && (yS >= 0) && (xS < this._width) && (yS < this._height)){
-            this._doWave(xS, yS);
-            return false;
-        }
+            this._mainLength = len;
+            this._maxLineLength = lineLen;
 
-        return true;
+            if((xS >= 0) && (yS >= 0) && (xS < this._width) && (yS < this._height)){
+                this._doWave(xS, yS);
+                //return false;
+            }
+        } while(this._mainLength > 0)
+        //return true;
+    },
+
+    getTrianglePoint: function(){
+        return this._trianglePoint;
     },
 
     getListOfNoWays: function(){
@@ -89,8 +96,14 @@ var DynamicHell = {
     },
 
     _doWave: function(xF, yF) {
-        if(this._mainLength <= 0)
-            return;
+        if(this._mainLength == 0)
+        {
+            this._trianglePoint = {
+                x: xF,
+                y: yF
+            };
+            return false;
+        }
         this._mainLength--;
         var steps = [];
         if(xF+1 < this._width)
@@ -116,7 +129,7 @@ var DynamicHell = {
                 && (trying < 10));
 
             if(trying >= 10)
-                return;
+                return true;
 
             this._map[xF][yF].push(steps[rnd]);
             this._map[steps[rnd].x][steps[rnd].y].push({x: xF, y: yF})
