@@ -33,6 +33,10 @@ Game = cc.Layer.extend({
         x: 0,
         y: 0
     },
+    heroLastIntPosition: {
+        x: 0,
+        y: 0
+    },
     subtitlesLayer:null,
     triangle:null,
 
@@ -483,6 +487,12 @@ Game = cc.Layer.extend({
             this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
             this.heroIntPosition.x = Math.round(this.hero.getPositionX() / levelScale);
             this.heroIntPosition.y = Math.round(this.hero.getPositionY() / levelScale);
+            if((this.heroLastIntPosition.x != this.heroIntPosition.x) ||
+                (this.heroLastIntPosition.y != this.heroIntPosition.y)) {
+                DynamicHell.addWasFlagToSegment(this.heroIntPosition, this.heroLastIntPosition);
+                this.heroLastIntPosition.x = this.heroIntPosition.x;
+                this.heroLastIntPosition.y = this.heroIntPosition.y;
+            }
             GhostManager.addGhost(this.hero.getPositionX(), this.hero.getPositionY());
         }
 
