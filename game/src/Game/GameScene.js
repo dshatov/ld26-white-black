@@ -7,9 +7,10 @@
  */
 
 const zOrder = {
-    fadeLayer: 3,
-    subtitlesLayer: 2,
-    hero: 1,
+    fadeLayer: 4,
+    subtitlesLayer: 3,
+    hero: 2,
+    mapLayer: 1,
     background: 0
 };
 
@@ -35,6 +36,7 @@ Game = cc.Layer.extend({
     },
     subtitlesLayer:null,
     triangle:null,
+    progress:0,
 
     init:function() {
         this._super();
@@ -42,8 +44,6 @@ Game = cc.Layer.extend({
         this.setMouseEnabled(true);
         this.setKeyboardEnabled(true);
         this.scheduleUpdate();
-
-        this.controlsBlocked = false;
 
         var fadeLayer = cc.LayerColor.create(kItemColor);
         fadeLayer.setOpacity(0);
@@ -58,16 +58,15 @@ Game = cc.Layer.extend({
         this.addChild(background, zOrder.background);
         this.background = background;
 
-        var hero = GameObject.create(GameObject.type_foursquare);
+        var hero = GameObject.create(GameObject.type_foursquare, 0);
         hero.setColor(kItemColor);
         hero.setPosition(0, 0);
         this.setPosition(cc.pMult(hero.getPosition(), -1));
+        this.addChild(hero, zOrder.hero);
+        this.hero = hero;
 
         this.heroIntPosition.x = 0;
         this.heroIntPosition.y = 0;
-
-        this.addChild(hero, zOrder.hero);
-        this.hero = hero;
 
         var circle = GameObject.create(GameObject.type_circle);
         circle.setColor(kItemColor);
@@ -84,12 +83,26 @@ Game = cc.Layer.extend({
         DynamicHell.createMap(64, 64);
         this.generateLevel();
 
-        this.initMapDebugDraw();
+//        this.initMapDebugDraw();
         this.initSmallMapDebugDraw();
 
         this.heroPulse();
+        cc.AudioEngine.getInstance().playEffect(e_born);
+
+        this.onStart();
 
         return true;
+    },
+
+    onStart:function() {
+        this.isPaused = true;
+
+        var _this = this;
+        this.runAction(
+            cc.Sequence.create(
+                
+            )
+        );
     },
 
     generateLevel:function() {
@@ -108,7 +121,7 @@ Game = cc.Layer.extend({
 
     initMapDebugDraw:function() {
         var gridNode = new cc.Node.create();
-        this.addChild(gridNode, 10);
+        this.addChild(gridNode, zOrder.mapLayer);
 
         gridNode.draw = function(ctx) {
             var context = ctx != null ? ctx : cc.renderContext;
@@ -127,28 +140,28 @@ Game = cc.Layer.extend({
 
     initSmallMapDebugDraw:function() {
         var smallmap = new cc.Node.create();
-        smallmap.setPosition(0, kScreenHeight/2);
-        this.addChild(smallmap, 10);
+        smallmap.setPosition(16.0, kScreenHeight/2);
+        this.addChild(smallmap, zOrder.mapLayer);
 
-        var hero = this.hero;
+        var _this = this;
         smallmap.draw = function(ctx) {
             var context = ctx != null ? ctx : cc.renderContext;
-            context.strokeStyle = "rgba(0,0,255,255)";
+            context.strokeStyle = "rgba(" + kItemColor.r + "," + kItemColor.g + "," + kItemColor.b + ",255)";
             context.lineWidth = 2;
 //            context.globalAlpha = 0.25;
 
             var segments = DynamicHell.getListOfSegments();
             for (var i = 0; i < segments.length; i++) {
                 var seg = segments[i];
-                cc.drawingUtil.drawLine(cc.p(seg.first.x*8, seg.first.y*8),
-                    cc.p(seg.last.x*8, seg.last.y*8));
+                cc.drawingUtil.drawLine(cc.p(seg.first.x*16, seg.first.y*16),
+                    cc.p(seg.last.x*16, seg.last.y*16));
             }
 
-            var x = Math.round((hero.getPosition().x/levelScale)*8.0);
-            var y = Math.round((hero.getPosition().y/levelScale)*8.0);
+            var x = Math.round((_this.hero.getPosition().x/levelScale)*16.0);
+            var y = Math.round((_this.hero.getPosition().y/levelScale)*16.0);
             context.lineWidth = 4;
-            context.strokeStyle = "rgba(255,0,0,255)";
-            cc.drawingUtil.drawPoint(cc.p(x, y));
+            context.fillStyle =  "rgba(255,0,0,255)";
+            cc.drawingUtil.drawPoint(cc.p(x, y), 4);
 
 
 //            context.globalAlpha = 1.0;
@@ -178,10 +191,20 @@ Game = cc.Layer.extend({
         );
     },
 
-    restart:function() {
+    nextLevel:function() {
         const t = 0.5;
 
         this.isPaused = true;
+        this.progress += 1;
+
+        if (this.progress >= 4) {
+            invertColors();
+            ccDirector.replaceScene(
+                cc.TransitionFade.create(3.0, FinishScene.create(), kBackgroundColor)
+            );
+
+            return;
+        }
 
         this.fadeLayer.setColor(kItemColor);
         this.fadeLayer.runAction(
@@ -189,6 +212,11 @@ Game = cc.Layer.extend({
                 cc.FadeTo.create(t, 255),
                 cc.CallFunc.create(function() {
                     invertColors();
+
+                    this.removeChild(this.hero);
+                    this.hero = GameObject.create(GameObject.type_foursquare, this.progress);
+                    this.addChild(this.hero);
+                    this.heroPulse();
 
                     this.background.setColor(kBackgroundColor);
                     for (var i = 0; i < this.getChildrenCount(); i++) {
@@ -199,6 +227,7 @@ Game = cc.Layer.extend({
                     }
 
                     this.generateLevel();
+
                     this.hero.setPosition(0, 0);
                     this.hero.setOpacity(255);
                     this.heroIntPosition.x = 0;
@@ -206,9 +235,22 @@ Game = cc.Layer.extend({
                     this.updateLayersPosition();
                 }, this),
                 cc.DelayTime.create(t/2),
+                cc.CallFunc.create(function() {
+                    cc.AudioEngine.getInstance().playEffect(e_born);
+                }),
                 cc.FadeTo.create(t, 0),
                 cc.CallFunc.create(function () {
-                    this.isPaused = false;
+                    const replyTime = 2.0;
+                    var _this = this;
+                    this.runAction(
+                        cc.Sequence.create(
+                            cc.CallFunc.create(this.makeReply("i feel me better!", this.hero, replyTime), this),
+                            cc.DelayTime.create(replyTime),
+                            cc.CallFunc.create(function() {
+                                _this.isPaused = false;
+                            })
+                        )
+                    );
                 }, this)
             )
         );
@@ -221,6 +263,7 @@ Game = cc.Layer.extend({
         cc.AudioEngine.getInstance().playEffect(e_death);
 
         this.isDead = true;
+        this.progress = 0;
 
         const t = 0.5;
 
@@ -230,6 +273,11 @@ Game = cc.Layer.extend({
                 cc.FadeTo.create(t, 255),
                 cc.CallFunc.create(function() {
                     invertColors();
+
+                    this.removeChild(this.hero);
+                    this.hero = GameObject.create(GameObject.type_foursquare, this.progress);
+                    this.addChild(this.hero);
+                    this.heroPulse();
 
                     this.background.setColor(kBackgroundColor);
                     for (var i = 0; i < this.getChildrenCount(); i++) {
@@ -249,6 +297,9 @@ Game = cc.Layer.extend({
                     // drop progress here
                 }, this),
                 cc.DelayTime.create(t/2),
+                cc.CallFunc.create(function() {
+                    cc.AudioEngine.getInstance().playEffect(e_born);
+                }),
                 cc.FadeTo.create(t, 0),
                 cc.CallFunc.create(function () {
                     this.isDead = false;
@@ -272,7 +323,7 @@ Game = cc.Layer.extend({
             } break;
 
             case cc.KEY.r: { // restart
-                this.restart();
+                this.nextLevel();
             } break;
 
             case cc.KEY.q: { // exit to main menu
@@ -321,44 +372,40 @@ Game = cc.Layer.extend({
 
     },
 
+    makeReply:function(text, gameobject, replyTime) {
+        var _this = this;
+        return function() {
+            _this.subtitlesLayer.showText(text, gameobject, replyTime);
+        }
+    },
+
     heroInteractWith:function(other) {
         other.isActive = false;
         this.isPaused = true;
 
-        const replyTime = 2.0;
+        const replyTime = 3.0;
         var _this = this;
-        var makeReply = function(text, gameobject) {
-            return function() {
-                _this.subtitlesLayer.showText(text, gameobject, replyTime);
-            }
-        };
-
         if (other.type == GameObject.type_triangle) {
             this.runAction(
                 cc.Sequence.create(
-                    cc.CallFunc.create(makeReply("i feel small and helpless", other), this),
+                    cc.CallFunc.create(this.makeReply("i feel small and helpless", other, replyTime), this),
                     cc.DelayTime.create(replyTime),
-                    cc.CallFunc.create(makeReply("maybe you can protect me?", other), this),
+                    cc.CallFunc.create(this.makeReply("maybe you can protect me?", other, replyTime), this),
                     cc.DelayTime.create(replyTime),
-//                    cc.CallFunc.create(makeReply("what the f*ck?!", this.hero), this),
-//                    cc.DelayTime.create(replyTime),
+                    cc.CallFunc.create(this.makeReply("please take me with you!", other, replyTime), this),
+                    cc.DelayTime.create(replyTime),
                     cc.CallFunc.create(function() {
-//                        other.runAction(cc.FadeTo.create(1.0, 0));
-                        _this.restart();
+                        _this.nextLevel();
                     })
-//                    cc.DelayTime.create(1.0),
-//                    cc.CallFunc.create(function() {
-//                        this.isPaused = false;
-//                    }, this)
                 )
             );
         }
         else if (other.type == GameObject.type_circle) {
             this.runAction(
                 cc.Sequence.create(
-                    cc.CallFunc.create(makeReply("blablabla, Mr. Freeman", other), this),
+                    cc.CallFunc.create(this.makeReply("blablabla, Mr. Freeman", other, replyTime), this),
                     cc.DelayTime.create(replyTime),
-                    cc.CallFunc.create(makeReply("?!", this.hero), this),
+                    cc.CallFunc.create(this.makeReply("?!", this.hero, replyTime), this),
                     cc.DelayTime.create(replyTime),
                     cc.CallFunc.create(function() {
                         other.runAction(cc.FadeTo.create(1.0, 0));
@@ -445,7 +492,7 @@ Game = cc.Layer.extend({
         this.background.setPosition(cc.pMult(this.getPosition(), -1));
         this.fadeLayer.setPosition(cc.pMult(this.getPosition(), -1));
         this.subtitlesLayer.setPosition(cc.pMult(this.getPosition(), -1));
-        this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1), cc.p(0, kScreenHeight/2)));
+        this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1), cc.p(16.0, kScreenHeight/2)));
     },
 
     update:function(dt) {
@@ -504,18 +551,18 @@ Game = cc.Layer.extend({
 
             const maxVisibilityDistance = 372.0;
             const fullVisibilityDistance = 128.0;
-            if (child instanceof GameObject && child.isActive) {
-                var distance = cc.pLength(cc.pSub(this.hero.getPosition(), child.getPosition()));
-                if (distance - fullVisibilityDistance >= maxVisibilityDistance) {
-                    child.setOpacity(0);
-                }
-                else if (distance > fullVisibilityDistance) {
-                    var k = (distance - fullVisibilityDistance)/(maxVisibilityDistance);
-                    k = k <= 1 ? k : 1;
-                    child.setOpacity((1 - k)*255);
-                }
-                else {
-                    child.setOpacity(255);
+            var distance = cc.pLength(cc.pSub(this.hero.getPosition(), child.getPosition()));
+            if (distance - fullVisibilityDistance >= maxVisibilityDistance) {
+                child.setOpacity(0);
+            }
+            else if (distance > fullVisibilityDistance) {
+                var k = (distance - fullVisibilityDistance)/(maxVisibilityDistance);
+                k = k <= 1 ? k : 1;
+                child.setOpacity((1 - k)*255);
+            }
+            else {
+                child.setOpacity(255);
+                if (child instanceof GameObject && child.isActive) {
                     this.heroInteractWith(child);
                 }
             }
