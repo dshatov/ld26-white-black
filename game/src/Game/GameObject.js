@@ -14,7 +14,7 @@ GameObject = cc.Node.extend({
     type:null,
     isActive:null,
 
-    init:function(type) {
+    init:function(type, progress) {
         cc.Assert(type == GameObject.type_foursquare
                   || type == GameObject.type_triangle
                   || type == GameObject.type_circle,
@@ -33,8 +33,8 @@ GameObject = cc.Node.extend({
             } break;
 
             case GameObject.type_triangle: {
-                s_black = s_foursquare_black;
-                s_white = s_foursquare_white;
+                s_black = s_triangle_black;
+                s_white = s_triangle_white;
             } break;
 
             case GameObject.type_circle: {
@@ -100,9 +100,9 @@ GameObject = cc.Node.extend({
     }
 });
 
-GameObject.create = function(type) {
+GameObject.create = function(type, progress) {
     var obj = new GameObject();
-    obj.init(type);
+    obj.init(type, progress);
     return obj;
 }
 

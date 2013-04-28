@@ -8,6 +8,9 @@ var s_foursquare_black = "res/foursquare_black.png";
 var s_circle_white = "res/circle_white.png";
 var s_cirlce_black = "res/circle_black.png";
 
+var s_triangle_white = "res/triangle_white.png";
+var s_triangle_black = "res/triangle_black.png";
+
 var e_voice_foursquare = "res/voice_foursquare.mp3";
 var e_voice_circle = "res/voice_circle.mp3";
 var e_voice_triangle = "res/voice_triangle.mp3";
@@ -20,8 +23,12 @@ var g_ressources = [
     //image
     {type:"image", src:s_foursquare_white},
     {type:"image", src:s_foursquare_black},
+
     {type:"image", src:s_circle_white},
     {type:"image", src:s_cirlce_black},
+
+    {type:"image", src:s_triangle_white},
+    {type:"image", src:s_triangle_black},
 //    {type:"image", src:s_HelloWorld},
 //    {type:"image", src:s_CloseNormal},
 //    {type:"image", src:s_CloseSelected}

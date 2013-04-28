@@ -34,14 +34,10 @@ Game = cc.Layer.extend({
         y: 0
     },
     subtitlesLayer:null,
-    controlsBlocked:false,
+    triangle:null,
 
     init:function() {
         this._super();
-
-        DynamicHell.createMap(64, 64);
-        this.generateLevel();
-        //DynamicHell.getListOfSegments()
 
         this.setMouseEnabled(true);
         this.setKeyboardEnabled(true);
@@ -65,6 +61,7 @@ Game = cc.Layer.extend({
         var hero = GameObject.create(GameObject.type_foursquare);
         hero.setColor(kItemColor);
         hero.setPosition(0, 0);
+        this.setPosition(cc.pMult(hero.getPosition(), -1));
 
         this.heroIntPosition.x = 0;
         this.heroIntPosition.y = 0;
@@ -78,6 +75,15 @@ Game = cc.Layer.extend({
         this.addChild(circle);
 //        this.circle = circle;
 
+        var triangle = GameObject.create(GameObject.type_triangle);
+        triangle.setColor(kItemColor);
+        triangle.setPosition(kScreenCenter);
+        this.addChild(triangle);
+        this.triangle = triangle;
+
+        DynamicHell.createMap(64, 64);
+        this.generateLevel();
+
         this.initMapDebugDraw();
         this.initSmallMapDebugDraw();
 
@@ -87,7 +93,17 @@ Game = cc.Layer.extend({
     },
 
     generateLevel:function() {
-        DynamicHell.generate(0, 0, 24, 2);
+        DynamicHell.generate(0, 0, 4, 2);
+        var tp = DynamicHell.getTrianglePoint();
+        tp = cc.p(tp.x*levelScale, tp.y*levelScale);
+        this.triangle.setPosition(tp);
+
+        for(var i = 0; i < this.getChildrenCount(); i++) {
+            var child = this._children[i];
+            if (child instanceof GameObject) {
+                child.isActive = true;
+            }
+        }
     },
 
     initMapDebugDraw:function() {
@@ -187,6 +203,7 @@ Game = cc.Layer.extend({
                     this.hero.setOpacity(255);
                     this.heroIntPosition.x = 0;
                     this.heroIntPosition.y = 0;
+                    this.updateLayersPosition();
                 }, this),
                 cc.DelayTime.create(t/2),
                 cc.FadeTo.create(t, 0),
@@ -227,6 +244,7 @@ Game = cc.Layer.extend({
                     this.hero.setOpacity(255);
                     this.heroIntPosition.x = 0;
                     this.heroIntPosition.y = 0;
+                    this.updateLayersPosition();
 
                     // drop progress here
                 }, this),
@@ -240,6 +258,10 @@ Game = cc.Layer.extend({
     },
 
     onKeyDown:function(evt) {
+        if (this.isDead || this.isPaused) {
+            return;
+        }
+
         switch (evt)
         {
             case cc.KEY.left:
@@ -267,6 +289,10 @@ Game = cc.Layer.extend({
     },
 
     onKeyUp:function(evt) {
+//        if (this.isDead || this.isPaused) {
+//            return;
+//        }
+
         switch (evt)
         {
             case cc.KEY.left:
@@ -282,6 +308,10 @@ Game = cc.Layer.extend({
     },
 
     onMouseDown:function(mouse) {
+        if (this.isDead || this.isPaused) {
+            return;
+        }
+
 //        var location = mouse.getLocation();
 //        this.invert();
 //        this.subtitlesLayer.showText("hello subtitles!", this.circle, 2.0);
@@ -293,41 +323,55 @@ Game = cc.Layer.extend({
 
     heroInteractWith:function(other) {
         other.isActive = false;
-        this.controlsBlocked = true;
-        if (other.type == GameObject.type_triangle) {
-            other.runAction(
-                cc.FadeTo.create(1.0, 0)
-            );
-            this.controlsBlocked = false;
-        }
-        else if (other.type == GameObject.type_circle) {
-            var _this = this;
-            var makeReply = function(text, gameobject, time) {
-                return function() {
-                    _this.subtitlesLayer.showText(text, gameobject, time);
-                }
-            };
+        this.isPaused = true;
 
-            const replyTime = 2.0;
+        const replyTime = 2.0;
+        var _this = this;
+        var makeReply = function(text, gameobject) {
+            return function() {
+                _this.subtitlesLayer.showText(text, gameobject, replyTime);
+            }
+        };
+
+        if (other.type == GameObject.type_triangle) {
             this.runAction(
                 cc.Sequence.create(
-                    cc.CallFunc.create(makeReply("(blablabla, Mr. Freeman)", other, replyTime), this),
+                    cc.CallFunc.create(makeReply("i feel small and helpless", other), this),
                     cc.DelayTime.create(replyTime),
-                    cc.CallFunc.create(makeReply("(what the f*ck?!)", this.hero, replyTime), this),
+                    cc.CallFunc.create(makeReply("maybe you can protect me?", other), this),
+                    cc.DelayTime.create(replyTime),
+//                    cc.CallFunc.create(makeReply("what the f*ck?!", this.hero), this),
+//                    cc.DelayTime.create(replyTime),
+                    cc.CallFunc.create(function() {
+//                        other.runAction(cc.FadeTo.create(1.0, 0));
+                        _this.restart();
+                    })
+//                    cc.DelayTime.create(1.0),
+//                    cc.CallFunc.create(function() {
+//                        this.isPaused = false;
+//                    }, this)
+                )
+            );
+        }
+        else if (other.type == GameObject.type_circle) {
+            this.runAction(
+                cc.Sequence.create(
+                    cc.CallFunc.create(makeReply("blablabla, Mr. Freeman", other), this),
+                    cc.DelayTime.create(replyTime),
+                    cc.CallFunc.create(makeReply("?!", this.hero), this),
                     cc.DelayTime.create(replyTime),
                     cc.CallFunc.create(function() {
                         other.runAction(cc.FadeTo.create(1.0, 0));
                     }),
                     cc.DelayTime.create(1.0),
                     cc.CallFunc.create(function() {
-                        this.controlsBlocked = false;
+                        this.isPaused = false;
                     }, this)
                 )
             );
         }
         else {
             cc.log("holy sh*t!");
-            this.controlsBlocked = false;
         }
     },
 
@@ -373,6 +417,37 @@ Game = cc.Layer.extend({
         return result;
     },
 
+    updateLayersPosition:function() {
+        var shift = 128.0;
+        var cameraPosition = cc.pMult(this.getPosition(), -1);
+        var center = kScreenCenter;
+        var heroPos = cc.pSub(this.hero.getPosition(), cameraPosition);
+        var dt = cc.p(0, 0);
+
+        if (heroPos.x > center.x + shift) {
+            dt.x = (center.x + shift) - heroPos.x;
+        }
+        else
+        if (heroPos.x < center.x - shift) {
+            dt.x = (center.x - shift) - heroPos.x;
+        }
+
+        if (heroPos.y > center.y + shift) {
+            dt.y = (center.y + shift) - heroPos.y;
+        }
+        else
+        if (heroPos.y < center.y - shift) {
+            dt.y = (center.y - shift) - heroPos.y;
+        }
+
+        this.setPosition(cc.pAdd(this.getPosition(), dt));
+
+        this.background.setPosition(cc.pMult(this.getPosition(), -1));
+        this.fadeLayer.setPosition(cc.pMult(this.getPosition(), -1));
+        this.subtitlesLayer.setPosition(cc.pMult(this.getPosition(), -1));
+        this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1), cc.p(0, kScreenHeight/2)));
+    },
+
     update:function(dt) {
         const heroSpeed = 320.0;
 
@@ -380,47 +455,45 @@ Game = cc.Layer.extend({
             return;
         }
 
-        if (this.controlsBlocked == false) {
-            var d = heroSpeed*dt;
-            var dp = null;
-            switch (this.heroDirection)
-            {
-                case Direction.left: {
-                    dp = cc.p(-d, 0);
-                } break;
+        var d = heroSpeed*dt;
+        var dp = null;
+        switch (this.heroDirection)
+        {
+            case Direction.left: {
+                dp = cc.p(-d, 0);
+            } break;
 
-                case Direction.right: {
-                    dp = cc.p(d, 0);
-                } break;
+            case Direction.right: {
+                dp = cc.p(d, 0);
+            } break;
 
-                case Direction.bottom: {
-                    dp = cc.p(0, d);
-                } break;
+            case Direction.bottom: {
+                dp = cc.p(0, d);
+            } break;
 
-                case Direction.top: {
-                    dp = cc.p(0, -d);
-                } break;
+            case Direction.top: {
+                dp = cc.p(0, -d);
+            } break;
 
-                default:
-                    break;
-            }
+            default:
+                break;
+        }
 
-            if (dp != null) {
-                this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
-                this.heroIntPosition.x = Math.round(this.hero.getPositionX() / levelScale);
-                this.heroIntPosition.y = Math.round(this.hero.getPositionY() / levelScale);
-            }
+        if (dp != null) {
+            this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
+            this.heroIntPosition.x = Math.round(this.hero.getPositionX() / levelScale);
+            this.heroIntPosition.y = Math.round(this.hero.getPositionY() / levelScale);
+        }
 
-            const maxDist = 128.0;
-            var dist = this.calculateHeroOffset();
-            if (dist >= maxDist) {
-                cc.log("so far: " + dist);
-                this.hero.setOpacity(0);
-                this.die();
-            }
-            else {
-                this.hero.setOpacity((1 - (dist/maxDist)*0.9)*255);
-            }
+        const maxDist = 128.0;
+        var dist = this.calculateHeroOffset();
+        if (dist >= maxDist) {
+            cc.log("so far: " + dist);
+            this.hero.setOpacity(0);
+            this.die();
+        }
+        else {
+            this.hero.setOpacity((1 - (dist/maxDist)*0.9)*255);
         }
 
         for (var i = 0; i < this.getChildrenCount(); i++) {
@@ -448,38 +521,7 @@ Game = cc.Layer.extend({
             }
         }
 
-        var shift = 128.0;
-        var cameraPosition = cc.pMult(this.getPosition(), -1);
-        var center = kScreenCenter;
-        var heroPos = cc.pSub(this.hero.getPosition(), cameraPosition);
-        var dt = cc.p(0, 0);
-
-        if (heroPos.x > center.x + shift) {
-            dt.x = (center.x + shift) - heroPos.x;
-        }
-        else
-        if (heroPos.x < center.x - shift) {
-            dt.x = (center.x - shift) - heroPos.x;
-        }
-
-        if (heroPos.y > center.y + shift) {
-            dt.y = (center.y + shift) - heroPos.y;
-        }
-        else
-        if (heroPos.y < center.y - shift) {
-            dt.y = (center.y - shift) - heroPos.y;
-        }
-
-//        var heroShiftFromCenter = cc.pSub(cc.pSub(this.hero.getPosition(), cameraPosition), kScreenCenter);
-//        var heroMaxShiftFromCenter = cc.pMult(cc.pNormalize(heroShiftFromCenter), 128.0);
-//        if (cc.pLength(heroMaxShiftFromCenter) < cc.pLength(heroShiftFromCenter)) {
-//            this.setPosition(cc.pSub(this.getPosition(), cc.pSub(heroShiftFromCenter, heroMaxShiftFromCenter)));
-//        }
-        this.setPosition(cc.pAdd(this.getPosition(), dt));
-        this.background.setPosition(cc.pMult(this.getPosition(), -1));
-        this.fadeLayer.setPosition(cc.pMult(this.getPosition(), -1));
-        this.subtitlesLayer.setPosition(cc.pMult(this.getPosition(), -1));
-        this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1), cc.p(0, kScreenHeight/2)));
+        this.updateLayersPosition();
     }
 });
 

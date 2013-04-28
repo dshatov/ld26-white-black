@@ -32,6 +32,14 @@ SubtitlesLayer = cc.Layer.extend({
 
     showText:function(text, gameobject, time) {
         if (gameobject != null) {
+            if (gameobject.type == GameObject.type_triangle) {
+                text = "< " + text + " >"
+            } else if (gameobject.type == GameObject.type_circle) {
+                text = "( " + text + " )"
+            } else if (gameobject.type == GameObject.type_foursquare) {
+                text = "[ " + text + " ]"
+            }
+
             var replyText = "#^&!$%@";
             this.replyLabel.setOpacity(0);
             this.replyLabel.setString(replyText);

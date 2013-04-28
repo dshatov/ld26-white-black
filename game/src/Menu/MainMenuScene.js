@@ -38,15 +38,23 @@ var MainMenu = cc.Layer.extend({
         item.setColor(kItemColor);
         menu.addChild(item);
 
+        this.setKeyboardEnabled(true);
+
         return true;
     },
 
-    play:function(sender) {
+    play:function() {
         ccDirector.replaceScene(
             cc.TransitionFade.create(
                 1.0, GameScene.create(), kBackgroundColor
             )
         );
+    },
+
+    onKeyUp:function(evt) {
+        if (evt == cc.KEY.space) {
+            this.play();
+        }
     },
 
     update:function(dt) {
