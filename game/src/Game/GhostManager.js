@@ -17,6 +17,12 @@ var GhostManager = {
     addGhost: function(x, y) {
         if(this._distance == null)
             this._distance = levelScale / 4;
+        if(Math.sqrt(Math.pow(x - this._ghostPosition.x, 2) + Math.pow(y - this._ghostPosition.y, 2)) > this._distance * 1.2)
+        {
+            this._ghostPosition.x = x;
+            this._ghostPosition.y = y;
+            return;
+        }
         if(Math.sqrt(Math.pow(x - this._ghostPosition.x, 2) + Math.pow(y - this._ghostPosition.y, 2)) > this._distance) {
             var nearGhost = false;
             for(var i = 0; i < this._ghosts.length; i++) {
