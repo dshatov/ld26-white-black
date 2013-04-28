@@ -40,7 +40,7 @@ Game = cc.Layer.extend({
         this._super();
 
         DynamicHell.createMap(64, 64);
-        DynamicHell.generate(0, 0, 24, 2);
+        this.generateLevel();
         //DynamicHell.getListOfSegments()
 
         this.setMouseEnabled(true);
@@ -84,6 +84,10 @@ Game = cc.Layer.extend({
         this.heroPulse();
 
         return true;
+    },
+
+    generateLevel:function() {
+        DynamicHell.generate(0, 0, 24, 2);
     },
 
     initMapDebugDraw:function() {
@@ -138,7 +142,7 @@ Game = cc.Layer.extend({
     },
 
     heroPulse:function() {
-        var t = 2.0;
+        var t = 0.5;
         this.hero.runAction(
             cc.Sequence.create(
                 cc.ScaleTo.create(t/2, 1.2),
@@ -178,10 +182,11 @@ Game = cc.Layer.extend({
                         }
                     }
 
-                    this.hero.setOpacity(255);
-
-                    DynamicHell.generate(0, 0, 24, 2);
+                    this.generateLevel();
                     this.hero.setPosition(0, 0);
+                    this.hero.setOpacity(255);
+                    this.heroIntPosition.x = 0;
+                    this.heroIntPosition.y = 0;
                 }, this),
                 cc.DelayTime.create(t/2),
                 cc.FadeTo.create(t, 0),
@@ -196,6 +201,7 @@ Game = cc.Layer.extend({
         if (this.isDead) {
             return;
         }
+        cc.AudioEngine.getInstance().playEffect(e_death);
 
         this.isDead = true;
 
@@ -216,13 +222,13 @@ Game = cc.Layer.extend({
                         }
                     }
 
-                    this.hero.setOpacity(255);
-
-                    DynamicHell.generate(0, 0, 24, 3);
+                    this.generateLevel();
                     this.hero.setPosition(0, 0);
+                    this.hero.setOpacity(255);
+                    this.heroIntPosition.x = 0;
+                    this.heroIntPosition.y = 0;
 
                     // drop progress here
-//                    this.isDead = false;
                 }, this),
                 cc.DelayTime.create(t/2),
                 cc.FadeTo.create(t, 0),
@@ -285,7 +291,7 @@ Game = cc.Layer.extend({
 
     },
 
-    heroInterractWith:function(other) {
+    heroInteractWith:function(other) {
         other.isActive = false;
         this.controlsBlocked = true;
         if (other.type == GameObject.type_triangle) {
@@ -312,6 +318,7 @@ Game = cc.Layer.extend({
                     cc.CallFunc.create(function() {
                         other.runAction(cc.FadeTo.create(1.0, 0));
                     }),
+                    cc.DelayTime.create(1.0),
                     cc.CallFunc.create(function() {
                         this.controlsBlocked = false;
                     }, this)
@@ -407,6 +414,7 @@ Game = cc.Layer.extend({
             const maxDist = 128.0;
             var dist = this.calculateHeroOffset();
             if (dist >= maxDist) {
+                cc.log("so far: " + dist);
                 this.hero.setOpacity(0);
                 this.die();
             }
@@ -435,7 +443,7 @@ Game = cc.Layer.extend({
                 }
                 else {
                     child.setOpacity(255);
-                    this.heroInterractWith(child);
+                    this.heroInteractWith(child);
                 }
             }
         }
