@@ -24,7 +24,7 @@ const Direction = {
 
 const levelScale = 512.0;
 const kGameObjectTag = 11;
-const kHeroSpeed = 320.0;
+const kHeroSpeed = 240.0;
 
 var Game;
 Game = cc.Layer.extend({
@@ -76,12 +76,6 @@ Game = cc.Layer.extend({
 
         this.heroIntPosition.x = 0;
         this.heroIntPosition.y = 0;
-
-        var circle = GameObject.create(GameObject.type_circle);
-        circle.setColor(kItemColor);
-        circle.setPosition(kScreenCenter);
-        this.addChild(circle);
-//        this.circle = circle;
 
         var triangle = GameObject.create(GameObject.type_triangle);
         triangle.setColor(kItemColor);
@@ -145,7 +139,7 @@ Game = cc.Layer.extend({
             this.removeChild(child);
         }
 
-        GhostManager.reset(128.0);
+        GhostManager.reset(192.0);
 
         if (this.steps) {
             this.steps.removeFromParent(true);
@@ -164,9 +158,16 @@ Game = cc.Layer.extend({
             }
         }
 
-        this.timePerLevel = (DynamicHell.getListOfSegments().length*levelScale/kHeroSpeed)*2.5;
+
+        this.timePerLevel = (DynamicHell.getListOfSegments().length*levelScale/kHeroSpeed)*4;
         cc.log("time per level: " + this.timePerLevel);
         this.countdown = this.timePerLevel;
+
+
+        var circle = GameObject.create(GameObject.type_circle);
+        circle.setColor(kItemColor);
+        circle.setPosition(kScreenCenter);
+        this.addChild(circle);
     },
 
     initMapDebugDraw:function() {
@@ -575,6 +576,10 @@ Game = cc.Layer.extend({
             }
 
             if ((!(child instanceof GameObject)) && (child.tag != kGameObjectTag)) {
+                continue;
+            }
+
+            if (!child.isActive) {
                 continue;
             }
 
