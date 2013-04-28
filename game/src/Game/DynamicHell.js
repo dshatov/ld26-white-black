@@ -15,9 +15,57 @@ var DynamicHell = {
     _maxLineLength: 0,
     _trianglePoint: null,
 
+    copyMap: function(src) {
+        var dest = [];
+        for(var i = 0; i < this._width; i++) {
+            dest.push([]);
+            for(var j = 0; j < this._height; j++) {
+                dest[i].push([]);
+            }
+        }
+
+        for(var i = 0; i < this._width; i++)
+            for(var j = 0; j < this._height; j++) {
+                if(src[i][j].length > 0)
+                    for(var k = 0; k < src[i][j].length; k++)
+                        dest[i][j].push(src[i][j][k]);
+            }
+
+        return dest;
+    },
+
+    generateSubBranch: function(xS, yS, len, lineLen) {
+        //xS, yS - точка, откуда строить траекторию
+        //len - максимальная длина траектории
+
+        var trying = 5;
+        do{
+            var tmp = this.copyMap(this._map);
+
+            this._mainLength = len;
+            this._maxLineLength = lineLen;
+
+            if((xS >= 0) && (yS >= 0) && (xS < this._width) && (yS < this._height)){
+                this._doWave(xS, yS);
+            }
+            if(this._mainLength > 0){
+                this._map = this.copyMap(tmp);
+                trying--;
+            }
+        }
+        while((this._mainLength > 0) && (trying > 0))
+
+        if(this._mainLength == 0)
+            return true;
+        else
+            return false;
+    },
+
     generate: function(xS, yS, len, lineLen) {
         //xS, yS - точка, откуда строить траекторию
         //len - максимальная длина траектории
+
+        var sbcount = 15;
 
         do{
             this.createMap(null, null);
@@ -30,11 +78,32 @@ var DynamicHell = {
                 //return false;
             }
         } while(this._mainLength > 0)
-        //return true;
+
+        for(; sbcount>0; sbcount--) {
+            var succ = false;
+            var vert = this.getListOfVertex();
+            do {
+                var i = Math.floor(Math.random() * vert.length);
+                succ = this.generateSubBranch(vert[i].x, vert[i].y, Math.floor(len / 4) + 1, lineLen)
+            }
+            while(succ)
+        }
     },
 
     getTrianglePoint: function(){
         return this._trianglePoint;
+    },
+
+    getListOfVertex: function(){
+        var result = [];
+        for(var i = 0; i < this._width; i++)
+            for(var j = 0; j < this._height; j++)
+                if(this._map[i][j].length > 0)
+                    result.push({
+                        x: i,
+                        y: j
+                    });
+        return result;
     },
 
     getListOfNoWays: function(){
