@@ -38,9 +38,22 @@ var MainMenu = cc.Layer.extend({
         item.setColor(kItemColor);
         menu.addChild(item);
 
+        var about = cc.MenuItemFont.create("ABOUT", this.about, this);
+        about.setColor(kItemColor);
+        about.setPosition({x: item.getPosition().x, y: item.getPosition().y-50});
+        menu.addChild(about);
+
         this.setKeyboardEnabled(true);
 
         return true;
+    },
+
+    about: function() {
+        ccDirector.replaceScene(
+            cc.TransitionFade.create(
+                1.0, AboutScene.create(), kBackgroundColor
+            )
+        )
     },
 
     play:function() {
