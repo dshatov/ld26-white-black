@@ -14,6 +14,7 @@ var DynamicHell = {
     _mainLength: 0,
     _maxLineLength: 0,
     _trianglePoint: null,
+    _segments: null,
 
     copyMap: function(src) {
         var dest = [];
@@ -88,10 +89,27 @@ var DynamicHell = {
             }
             while(succ)
         }
+        this.generateListOfSegments();
     },
 
     getTrianglePoint: function(){
         return this._trianglePoint;
+    },
+
+    addWasFlagToSegment: function(first, last) {
+        cc.log("was method started");
+        for(var i = 0; i < this._segments.length; i++) {
+            var seg = this._segments[i];
+
+            if(((seg.first.x == first.x && seg.first.y == first.y) &&
+                    (seg.last.x == last.x && seg.last.y == last.y)) ||
+                ((seg.first.x == last.x && seg.first.y == last.y) &&
+                    (seg.last.x == first.x && seg.last.y == first.y))) {
+                this._segments[i].was = true;
+                cc.log("seg was: " + first.x + " " + first.y + "; " + last.x + " " + last.y);
+                return;
+            }
+        }
     },
 
     getListOfVertex: function(){
@@ -118,22 +136,28 @@ var DynamicHell = {
         return result;
     },
 
-    getListOfSegments: function(){
-        if(this._map == null)
-            return null;
+    getListOfSegments: function() {
+        return this._segments;
+    },
 
-        var result = [];
+    generateListOfSegments: function(){
+        if(this._map == null) {
+            this._segments = null;
+            return;
+        }
+
+        this._segments = [];
         for(var i = 0; i < this._width; i++)
             for(var j = 0; j < this._height; j++)
                 for(var k = 0; k < this._map[i][j].length; k++)
                     if((i <= this._map[i][j][k].x) && (j <= this._map[i][j][k].y))
                     {
-                        result.push({
+                        this._segments.push({
                             first: {x: i, y: j},
-                            last: {x: this._map[i][j][k].x, y: this._map[i][j][k].y}
+                            last: {x: this._map[i][j][k].x, y: this._map[i][j][k].y},
+                            was: false
                         });
                     }
-        return result;
     },
 
     lineLength: function(xF, yF, xL, yL) {
