@@ -28,8 +28,9 @@ GameObject = cc.Node.extend({
         switch (this.type)
         {
             case GameObject.type_foursquare: {
-                s_black = s_foursquare_black;
-                s_white = s_foursquare_white;
+                progress = progress != null ? progress : 0;
+                s_black = window["s_foursquare_black_" + progress];
+                s_white = window["s_foursquare_white_" + progress];
             } break;
 
             case GameObject.type_triangle: {

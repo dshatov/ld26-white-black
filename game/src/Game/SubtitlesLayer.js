@@ -41,6 +41,7 @@ SubtitlesLayer = cc.Layer.extend({
             }
 
             var replyText = "#^&!$%@";
+            this.replyLabel.stopAllActions();
             this.replyLabel.setOpacity(0);
             this.replyLabel.setString(replyText);
             this.replyLabel.setColor(kItemColor);
@@ -56,6 +57,7 @@ SubtitlesLayer = cc.Layer.extend({
             );
         }
 
+        this.subtitleLabel.stopAllActions();
         this.subtitleLabel.setOpacity(0);
         this.subtitleLabel.setString(text);
         this.subtitleLabel.setColor(kItemColor);
@@ -70,7 +72,8 @@ SubtitlesLayer = cc.Layer.extend({
         switch (gameobject.type)
         {
             case GameObject.type_foursquare: {
-                cc.AudioEngine.getInstance().playEffect(e_voice_foursquare);
+                var voice = window["e_voice_foursquare_" + randomIntBetween(0, 1)];
+                cc.AudioEngine.getInstance().playEffect(voice);
             } break;
 
             case GameObject.type_circle: {
