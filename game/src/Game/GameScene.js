@@ -40,8 +40,7 @@ Game = cc.Layer.extend({
         this._super();
 
         DynamicHell.createMap(64, 64);
-
-        DynamicHell.generate(0, 0, 64, 3);
+        DynamicHell.generate(0, 0, 24, 2);
         //DynamicHell.getListOfSegments()
 
         this.setMouseEnabled(true);
@@ -162,6 +161,8 @@ Game = cc.Layer.extend({
     restart:function() {
         const t = 0.5;
 
+        this.isPaused = true;
+
         this.fadeLayer.setColor(kItemColor);
         this.fadeLayer.runAction(
             cc.Sequence.create(
@@ -177,16 +178,27 @@ Game = cc.Layer.extend({
                         }
                     }
 
-                    DynamicHell.generate(0, 0, 24, 3);
+                    this.hero.setOpacity(255);
+
+                    DynamicHell.generate(0, 0, 24, 2);
                     this.hero.setPosition(0, 0);
                 }, this),
                 cc.DelayTime.create(t/2),
-                cc.FadeTo.create(t, 0)
+                cc.FadeTo.create(t, 0),
+                cc.CallFunc.create(function () {
+                    this.isPaused = false;
+                }, this)
             )
         );
     },
 
     die:function() {
+        if (this.isDead) {
+            return;
+        }
+
+        this.isDead = true;
+
         const t = 0.5;
 
         this.fadeLayer.setColor(kItemColor);
@@ -204,13 +216,19 @@ Game = cc.Layer.extend({
                         }
                     }
 
+                    this.hero.setOpacity(255);
+
                     DynamicHell.generate(0, 0, 24, 3);
                     this.hero.setPosition(0, 0);
 
                     // drop progress here
+//                    this.isDead = false;
                 }, this),
                 cc.DelayTime.create(t/2),
-                cc.FadeTo.create(t, 0)
+                cc.FadeTo.create(t, 0),
+                cc.CallFunc.create(function () {
+                    this.isDead = false;
+                }, this)
             )
         );
     },
@@ -326,8 +344,7 @@ Game = cc.Layer.extend({
             }
         }
 
-
-        if(i >= 0)
+        if(nearPoints.length > 0 && nearI > -1)
         {
             if(nearPoints[nearI].x != this.heroIntPosition.x){
                 var arr = [];
@@ -351,6 +368,10 @@ Game = cc.Layer.extend({
 
     update:function(dt) {
         const heroSpeed = 320.0;
+
+        if (this.isDead || this.isPaused) {
+            return;
+        }
 
         if (this.controlsBlocked == false) {
             var d = heroSpeed*dt;
@@ -381,9 +402,16 @@ Game = cc.Layer.extend({
                 this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
                 this.heroIntPosition.x = Math.round(this.hero.getPositionX() / levelScale);
                 this.heroIntPosition.y = Math.round(this.hero.getPositionY() / levelScale);
+            }
 
-
-
+            const maxDist = 128.0;
+            var dist = this.calculateHeroOffset();
+            if (dist >= maxDist) {
+                this.hero.setOpacity(0);
+                this.die();
+            }
+            else {
+                this.hero.setOpacity((1 - (dist/maxDist)*0.9)*255);
             }
         }
 
