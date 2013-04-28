@@ -164,7 +164,7 @@ Game = cc.Layer.extend({
             }
         }
 
-        this.timePerLevel = (DynamicHell.getListOfSegments().length*levelScale/kHeroSpeed)*1.5;
+        this.timePerLevel = (DynamicHell.getListOfSegments().length*levelScale/kHeroSpeed)*2.5;
         cc.log("time per level: " + this.timePerLevel);
         this.countdown = this.timePerLevel;
     },
@@ -198,13 +198,19 @@ Game = cc.Layer.extend({
             var context = ctx != null ? ctx : cc.renderContext;
             context.strokeStyle = "rgba(" + kItemColor.r + "," + kItemColor.g + "," + kItemColor.b + ",255)";
             context.lineWidth = 2;
-//            context.globalAlpha = 0.25;
+            context.globalAlpha = 0.5;
 
             var segments = DynamicHell.getListOfSegments();
             for (var i = 0; i < segments.length; i++) {
                 var seg = segments[i];
-                cc.drawingUtil.drawLine(cc.p(seg.first.x*16, seg.first.y*16),
-                    cc.p(seg.last.x*16, seg.last.y*16));
+                if (seg.was) {
+                    cc.drawingUtil.drawLine(cc.p(seg.first.x*16, seg.first.y*16),
+                        cc.p(seg.last.x*16, seg.last.y*16));
+
+                    context.fillStyle =  "rgba(" + kItemColor.r + "," + kItemColor.g + "," + kItemColor.b + ",255)";
+                    cc.drawingUtil.drawPoint(cc.p(seg.first.x*16, seg.first.y*16), 2);
+                    cc.drawingUtil.drawPoint(cc.p(seg.last.x*16, seg.last.y*16), 2);
+                }
             }
 
             var x = Math.round((_this.hero.getPosition().x/levelScale)*16.0);
@@ -558,7 +564,7 @@ Game = cc.Layer.extend({
         this.background.setPosition(cc.pMult(this.getPosition(), -1));
         this.fadeLayer.setPosition(cc.pMult(this.getPosition(), -1));
         this.subtitlesLayer.setPosition(cc.pMult(this.getPosition(), -1));
-        this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1), cc.p(16.0, kScreenHeight/2)));
+        this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1), cc.p(kScreenWidth/2, kScreenHeight/2)));//cc.p(16.0, kScreenHeight/2)));
     },
 
     updateObjects:function() {
