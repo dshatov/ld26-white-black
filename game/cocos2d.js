@@ -41,7 +41,7 @@
 
             // menu
             'src/Menu/MainMenuScene.js',
-            'src/Menu/MainMenuScene.js',
+            'src/Menu/AboutScene.js',
 
             // game
             'src/Game/GameConfig.js',

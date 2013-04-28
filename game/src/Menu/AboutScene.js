@@ -20,15 +20,16 @@ var About = cc.Layer.extend({
         this.addChild(background);
 
         var menu = cc.Menu.create();
-        menu.setPosition({x: 150, y: 150});
+        menu.setPosition(kScreenCenter.x, 72.0);
         this.addChild(menu);
 
-        this.renderDevelopers();
+        this.createPage();
 
-        var backButton = cc.MenuItemFont.create("BACK", this.mainMenu, this);
+        var backButton = cc.MenuItemFont.create("back", this.mainMenu, this);
         backButton.setColor(kItemColor);
         menu.addChild(backButton);
     },
+
     mainMenu: function() {
         ccDirector.replaceScene(
             cc.TransitionFade.create(
@@ -36,14 +37,13 @@ var About = cc.Layer.extend({
             )
         )
     },
-    renderDevelopers: function() {
+
+    createPage: function() {
        var sp = {x: 470, y: 400}, cursopposition, that = this;
 
-        var label = cc.LabelTTF.create("Game about existential suffering of foursquare.");
+        var label = cc.LabelTTF.create("This is a game about existential suffering of foursquare.", "Arial", 32);
         label.setColor(kItemColor);
-        label.setPosition(sp);
-        label.setFontSize(30);
-        label.setFontName('Arial');
+        label.setPosition(kScreenCenter);
         this.addChild(label);
         /*
         developers.forEach(function(el) {

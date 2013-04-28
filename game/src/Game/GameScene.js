@@ -91,7 +91,7 @@ Game = cc.Layer.extend({
 
         this.updateObjects();
         this.updateLayersPosition();
-//        this.onStart();
+        this.onStart();
 
         this.heroPulse();
         cc.AudioEngine.getInstance().playEffect(e_born);
@@ -112,6 +112,26 @@ Game = cc.Layer.extend({
                 cc.DelayTime.create(2.0),
                 cc.CallFunc.create(this.makeReply("emptiness inside", this.hero, 3.0), this),
                 cc.DelayTime.create(3.0),
+//                cc.CallFunc.create(function () {
+//                    var circle = GameObject.create(GameObject.type_circle);
+//                    circle.setPosition(cc.pAdd(_this.hero.getPosition(), cc.p(0, 128.0)));
+//                    circle.setOpacity(255);
+//                    circle.isActive = false;
+//                    _this.addChild(circle);
+//
+//                    circle.runAction(
+//                        cc.Sequence.create(
+//                            cc.FadeTo.create(1.0, 255),
+//                            cc.DelayTime.create(0.5),
+//                            cc.CallFunc.create(_this.makeReply("blablabla", circle, 2.0)),
+//                            cc.DelayTime.create(2.0),
+//                            cc.FadeTo.create(1.0, 0),
+//                            cc.CallFunc.create(function () {
+//                                _this.isPaused = false;
+//                            })
+//                        )
+//                    );
+//                }),
                 cc.CallFunc.create(function () {
                     _this.isPaused = false;
                 })
@@ -139,7 +159,7 @@ Game = cc.Layer.extend({
             this.removeChild(child);
         }
 
-        GhostManager.reset(192.0);
+        GhostManager.reset(128.0);
 
         if (this.steps) {
             this.steps.removeFromParent(true);
@@ -164,10 +184,26 @@ Game = cc.Layer.extend({
         this.countdown = this.timePerLevel;
 
 
-        var circle = GameObject.create(GameObject.type_circle);
-        circle.setColor(kItemColor);
-        circle.setPosition(kScreenCenter);
-        this.addChild(circle);
+        var vertices = DynamicHell.getListOfVertex();
+        var tp = DynamicHell.getTrianglePoint();
+        for (var i = 1; i < vertices.length; i++) {
+            if (randomIntBetween(0, 5) != 0
+                || (vertices[i].x == 0 && vertices[i].y == 0)
+                || (vertices[i].x == tp.x && vertices[i].y == tp.y)) {
+                continue;
+            }
+
+            var p = cc.p(vertices[i].x*levelScale, vertices[i].y*levelScale);
+            var circle = GameObject.create(GameObject.type_circle);
+            circle.setColor(kItemColor);
+            circle.setPosition(p);
+            this.addChild(circle);
+        }
+
+//        var deadlocks = DynamicHell.getListOfNoWays();
+//        for (var i = 1; i < vertices.length; i++) {
+//
+//        }
     },
 
     initMapDebugDraw:function() {
@@ -316,7 +352,7 @@ Game = cc.Layer.extend({
                     var _this = this;
                     this.runAction(
                         cc.Sequence.create(
-                            cc.CallFunc.create(this.makeReply("i feel me better!", this.hero, replyTime), this),
+                            cc.CallFunc.create(this.makeReply("i feel better!", this.hero, replyTime), this),
                             cc.DelayTime.create(replyTime),
                             cc.CallFunc.create(function() {
                                 _this.isPaused = false;
@@ -459,27 +495,94 @@ Game = cc.Layer.extend({
         const replyTime = 3.0;
         var _this = this;
         if (other.type == GameObject.type_triangle) {
-            this.runAction(
-                cc.Sequence.create(
-                    cc.CallFunc.create(this.makeReply("i feel small and helpless", other, replyTime), this),
-                    cc.DelayTime.create(replyTime),
-                    cc.CallFunc.create(this.makeReply("maybe you can protect me?", other, replyTime), this),
-                    cc.DelayTime.create(replyTime),
-                    cc.CallFunc.create(this.makeReply("please take me with you!", other, replyTime), this),
-                    cc.DelayTime.create(replyTime),
-                    cc.CallFunc.create(function() {
-                        _this.nextLevel();
-                    })
-                )
-            );
+            if (this.progress == 0) {
+                this.runAction(
+                    cc.Sequence.create(
+                        cc.CallFunc.create(this.makeReply("i'm small and defenseless", other, replyTime), this),
+                        cc.DelayTime.create(replyTime),
+                        cc.CallFunc.create(this.makeReply("can you protect me?", other, replyTime), this),
+                        cc.DelayTime.create(replyTime),
+                        cc.CallFunc.create(this.makeReply("i can", this.hero, replyTime), this),
+                        cc.DelayTime.create(replyTime),
+                        cc.CallFunc.create(function() {
+                            _this.nextLevel();
+                        })
+                    )
+                );
+            }
+            else if (this.progress == 1) {
+                this.runAction(
+                    cc.Sequence.create(
+                        cc.CallFunc.create(this.makeReply("take me with you!", other, replyTime), this),
+                        cc.DelayTime.create(replyTime),
+                        cc.CallFunc.create(this.makeReply("follow me", this.hero, replyTime), this),
+                        cc.DelayTime.create(replyTime),
+                        cc.CallFunc.create(function() {
+                            _this.nextLevel();
+                        })
+                    )
+                );
+            }
+            else if (this.progress == 2) {
+                this.runAction(
+                    cc.Sequence.create(
+                        cc.CallFunc.create(this.makeReply("are you looking for me?", other, replyTime), this),
+                        cc.DelayTime.create(replyTime),
+                        cc.CallFunc.create(this.makeReply("yes, come with me now", this.hero, replyTime), this),
+                        cc.DelayTime.create(replyTime),
+                        cc.CallFunc.create(function() {
+                            _this.nextLevel();
+                        })
+                    )
+                );
+            }
+            else if (this.progress == 3) {
+                this.runAction(
+                    cc.Sequence.create(
+                        cc.CallFunc.create(this.makeReply("i can not wait anymore!", other, replyTime), this),
+                        cc.DelayTime.create(replyTime),
+                        cc.CallFunc.create(this.makeReply("i know, let's go", this.hero, replyTime), this),
+                        cc.DelayTime.create(replyTime),
+                        cc.CallFunc.create(function() {
+                            _this.nextLevel();
+                        })
+                    )
+                );
+            }
         }
         else if (other.type == GameObject.type_circle) {
+            var replies = [
+                "you will die in agony",
+                "your vertices are ghoulish",
+                "become a circle or die",
+                "you will not find anything here",
+                "you existence is meaningless",
+                "you are useless"
+            ];
+
+            var eggs = [
+                "blablabla, Mr. Freeman",
+                "wake up Neo"
+            ];
+
+            var text = null;
+            if (randomIntBetween(0, 50) != 0) {
+                text = replies[Math.floor(Math.random() * replies.length)];
+            }
+            else {
+                text = eggs[Math.floor(Math.random() * eggs.length)];
+            }
+
+            if (text == null) {
+                return;
+            }
+
             this.runAction(
                 cc.Sequence.create(
-                    cc.CallFunc.create(this.makeReply("blablabla, Mr. Freeman", other, replyTime), this),
+                    cc.CallFunc.create(this.makeReply(text, other, replyTime), this),
                     cc.DelayTime.create(replyTime),
-                    cc.CallFunc.create(this.makeReply("?!", this.hero, replyTime), this),
-                    cc.DelayTime.create(replyTime),
+//                    cc.CallFunc.create(this.makeReply("?!", this.hero, replyTime), this),
+//                    cc.DelayTime.create(replyTime),
                     cc.CallFunc.create(function() {
                         other.runAction(cc.FadeTo.create(1.0, 0));
                     }),
@@ -565,7 +668,8 @@ Game = cc.Layer.extend({
         this.background.setPosition(cc.pMult(this.getPosition(), -1));
         this.fadeLayer.setPosition(cc.pMult(this.getPosition(), -1));
         this.subtitlesLayer.setPosition(cc.pMult(this.getPosition(), -1));
-        this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1), cc.p(kScreenWidth/2, kScreenHeight/2)));//cc.p(16.0, kScreenHeight/2)));
+        this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1),
+                                  cc.p(kScreenWidth/2, kScreenHeight/2)));//cc.p(16.0, kScreenHeight/2)));
     },
 
     updateObjects:function() {
@@ -579,7 +683,7 @@ Game = cc.Layer.extend({
                 continue;
             }
 
-            if (!child.isActive) {
+            if (child.isActive == false) {
                 continue;
             }
 

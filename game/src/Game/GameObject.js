@@ -25,7 +25,8 @@ GameObject = cc.Node.extend({
 
         var s_black = null;
         var s_white = null;
-        var animation = null;
+        var animation_b = null;
+        var animation_w = null;
         switch (this.type)
         {
             case GameObject.type_foursquare: {
@@ -36,15 +37,41 @@ GameObject = cc.Node.extend({
 
             case GameObject.type_triangle: {
                 s_black = s_triangle_black;
-                s_white = s_triangle_white;
+                s_white = s_triangle_white;;
+
+                var t = 0.5;
+                animation_b = cc.RepeatForever.create(
+                    cc.Sequence.create(
+                        cc.ScaleTo.create(t/2, 0.8, 1.0),
+                        cc.ScaleTo.create(t, 1.0, 1.0),
+                        cc.ScaleTo.create(t/2, 0.8, 1.0),
+                        cc.ScaleTo.create(t, 1.0, 1.0)
+                    )
+                );
+                animation_w = cc.RepeatForever.create(
+                    cc.Sequence.create(
+                        cc.ScaleTo.create(t/2, 0.8, 1.0),
+                        cc.ScaleTo.create(t, 1.0, 1.0),
+                        cc.ScaleTo.create(t/2, 0.8, 1.0),
+                        cc.ScaleTo.create(t, 1.0, 1.0)
+                    )
+                );
             } break;
 
             case GameObject.type_circle: {
                 s_black = s_cirlce_black;
                 s_white = s_circle_white;
 
-                var t = 0.5;
-                animation = cc.RepeatForever.create(
+                var t = 1.0;
+                animation_b = cc.RepeatForever.create(
+                    cc.Sequence.create(
+                        cc.ScaleTo.create(t, 1.2, 1.0),
+                        cc.ScaleTo.create(t, 1.0, 1.0),
+                        cc.ScaleTo.create(t, 1.0, 1.2),
+                        cc.ScaleTo.create(t, 1.0, 1.0)
+                    )
+                );
+                animation_w = cc.RepeatForever.create(
                     cc.Sequence.create(
                         cc.ScaleTo.create(t, 1.2, 1.0),
                         cc.ScaleTo.create(t, 1.0, 1.0),
@@ -71,9 +98,9 @@ GameObject = cc.Node.extend({
 
         this.setColor(kColorWhite);
 
-        if (animation) {
-            this.white.runAction(animation);
-            this.black.runAction(animation);
+        if (animation_b || animation_w) {
+            this.white.runAction(animation_b);
+            this.black.runAction(animation_w);
         }
     },
 
