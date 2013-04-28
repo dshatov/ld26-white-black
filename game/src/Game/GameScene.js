@@ -7,9 +7,10 @@
  */
 
 const zOrder = {
-    fadeLayer: 4,
-    subtitlesLayer: 3,
-    hero: 2,
+    fadeLayer: 5,
+    subtitlesLayer: 4,
+    hero: 3,
+    steps: 2,
     mapLayer: 1,
     background: 0
 };
@@ -92,7 +93,7 @@ Game = cc.Layer.extend({
 
         this.updateObjects();
         this.updateLayersPosition();
-        this.onStart();
+//        this.onStart();
 
         this.heroPulse();
         cc.AudioEngine.getInstance().playEffect(e_born);
@@ -132,7 +133,19 @@ Game = cc.Layer.extend({
                 continue;
             }
 
+            if (child.tag == kGameObjectTag) {
+                cc.log(child);
+            }
+
+            child.stopAllActions();
             this.removeChild(child);
+        }
+
+        GhostManager.reset(128.0);
+
+        if (this.steps) {
+            this.steps.removeFromParent(true);
+            this.steps = null;
         }
 
         DynamicHell.generate(0, 0, 4, 2);
@@ -621,7 +634,33 @@ Game = cc.Layer.extend({
             this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
             this.heroIntPosition.x = Math.round(this.hero.getPositionX() / levelScale);
             this.heroIntPosition.y = Math.round(this.hero.getPositionY() / levelScale);
-            GhostManager.addGhost(this.hero.getPositionX(), this.hero.getPositionY());
+
+            var p = GhostManager.addGhost(this.hero.getPositionX(), this.hero.getPositionY());
+            if (p != null) {
+                if (this.steps == null) {
+                    this.steps = cc.Layer.create();
+                    this.addChild(this.steps, zOrder.steps);
+                }
+
+                var s = cc.Sprite.create(s_step);
+                s.setPosition(p.x, p.y);
+                s.setScale(0);
+                s.tag = kGameObjectTag;
+                s.setUserData(p);
+                this.steps.addChild(s);
+
+//                var _this = this;
+                s.runAction(
+                    cc.Sequence.create(
+                        cc.EaseBackOut.create(cc.ScaleTo.create(0.3, 0.8)),
+                        cc.ScaleTo.create(30, 0),
+                        cc.CallFunc.create(function () {
+                            s.removeFromParent(s, true);
+                            GhostManager.removeGhost(s.getUserData());
+                        }, this)
+                    )
+                );
+            }
         }
 
 

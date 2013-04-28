@@ -14,6 +14,8 @@ var s_foursquare_black_2 = "res/foursquare_black_2.png";
 var s_foursquare_black_3 = "res/foursquare_black_3.png";
 var s_foursquare_black_4 = "res/foursquare_black_4.png";
 
+var s_step = "res/step.png";
+
 var s_circle_white = "res/circle_white.png";
 var s_cirlce_black = "res/circle_black.png";
 
@@ -43,6 +45,8 @@ var g_ressources = [
     {type:"image", src:s_foursquare_black_2},
     {type:"image", src:s_foursquare_black_3},
     {type:"image", src:s_foursquare_black_4},
+
+    {type:"image", src:s_step},
 
     {type:"image", src:s_circle_white},
     {type:"image", src:s_cirlce_black},
