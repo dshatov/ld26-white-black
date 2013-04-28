@@ -48,7 +48,8 @@
             'src/Game/GameObject.js',
             'src/Game/SubtitlesLayer.js',
             'src/Game/DynamicHell.js',
-            'src/Game/FinishScene.js'
+            'src/Game/FinishScene.js',
+            'src/Game/GhostManager.js'
         ]
     };
     window.addEventListener('DOMContentLoaded', function () {

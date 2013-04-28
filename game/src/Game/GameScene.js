@@ -621,7 +621,9 @@ Game = cc.Layer.extend({
             this.hero.setPosition(cc.pAdd(this.hero.getPosition(), dp));
             this.heroIntPosition.x = Math.round(this.hero.getPositionX() / levelScale);
             this.heroIntPosition.y = Math.round(this.hero.getPositionY() / levelScale);
+            GhostManager.addGhost(this.hero.getPositionX(), this.hero.getPositionY());
         }
+
 
         const maxDist = 128.0;
         var dist = this.calculateHeroOffset();
