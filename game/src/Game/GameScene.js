@@ -22,6 +22,8 @@ const Direction = {
 };
 
 const levelScale = 512.0;
+const kGameObjectTag = 11;
+const kHeroSpeed = 320.0;
 
 var Game;
 Game = cc.Layer.extend({
@@ -37,6 +39,8 @@ Game = cc.Layer.extend({
     subtitlesLayer:null,
     triangle:null,
     progress:0,
+    timePerLevel:0,
+    countdown:0,
 
     init:function() {
         this._super();
@@ -86,10 +90,12 @@ Game = cc.Layer.extend({
 //        this.initMapDebugDraw();
         this.initSmallMapDebugDraw();
 
+        this.updateObjects();
+        this.updateLayersPosition();
+        this.onStart();
+
         this.heroPulse();
         cc.AudioEngine.getInstance().playEffect(e_born);
-
-        this.onStart();
 
         return true;
     },
@@ -100,12 +106,35 @@ Game = cc.Layer.extend({
         var _this = this;
         this.runAction(
             cc.Sequence.create(
-                
+                cc.DelayTime.create(2.0),
+                cc.CallFunc.create(this.makeReply("where am i?", this.hero, 2.0), this),
+                cc.DelayTime.create(3.0),
+                cc.CallFunc.create(this.makeReply("i feel", this.hero, 2.0), this),
+                cc.DelayTime.create(2.0),
+                cc.CallFunc.create(this.makeReply("emptiness inside", this.hero, 3.0), this),
+                cc.DelayTime.create(3.0),
+                cc.CallFunc.create(function () {
+                    _this.isPaused = false;
+                })
             )
         );
     },
 
     generateLevel:function() {
+        var i;
+        for (i = 0; i < this.getChildrenCount(); i++) {
+            var child = this._children[i];
+            if (child == this.hero
+                || child == this.triangle
+                || (!(child instanceof GameObject)
+                && child.tag != kGameObjectTag))
+            {
+                continue;
+            }
+
+            this.removeChild(child);
+        }
+
         DynamicHell.generate(0, 0, 4, 2);
         var tp = DynamicHell.getTrianglePoint();
         tp = cc.p(tp.x*levelScale, tp.y*levelScale);
@@ -117,6 +146,10 @@ Game = cc.Layer.extend({
                 child.isActive = true;
             }
         }
+
+        this.timePerLevel = (DynamicHell.getListOfSegments().length*levelScale/kHeroSpeed)*1.5;
+        cc.log("time per level: " + this.timePerLevel);
+        this.countdown = this.timePerLevel;
     },
 
     initMapDebugDraw:function() {
@@ -171,7 +204,21 @@ Game = cc.Layer.extend({
     },
 
     heroPulse:function() {
-        var t = 0.5;
+        const maxT = 2.0;
+        const minT = 0.5;
+        var t = maxT;
+        var d = 40.0;
+        if (this.countdown < d) {
+            if (this.countdown > 20) {
+                t = minT + (maxT - minT)*((this.countdown - 20)/20);
+            }
+            else {
+                t = minT;
+            }
+        }
+
+//        cc.log(t);
+
         this.hero.runAction(
             cc.Sequence.create(
                 cc.ScaleTo.create(t/2, 1.2),
@@ -232,6 +279,7 @@ Game = cc.Layer.extend({
                     this.hero.setOpacity(255);
                     this.heroIntPosition.x = 0;
                     this.heroIntPosition.y = 0;
+                    this.updateObjects();
                     this.updateLayersPosition();
                 }, this),
                 cc.DelayTime.create(t/2),
@@ -292,6 +340,7 @@ Game = cc.Layer.extend({
                     this.hero.setOpacity(255);
                     this.heroIntPosition.x = 0;
                     this.heroIntPosition.y = 0;
+                    this.updateObjects();
                     this.updateLayersPosition();
 
                     // drop progress here
@@ -495,14 +544,56 @@ Game = cc.Layer.extend({
         this.smallmap.setPosition(cc.pAdd(cc.pMult(this.getPosition(), -1), cc.p(16.0, kScreenHeight/2)));
     },
 
-    update:function(dt) {
-        const heroSpeed = 320.0;
+    updateObjects:function() {
+        for (var i = 0; i < this.getChildrenCount(); i++) {
+            var child = this.getChildren()[i];
+            if (child == this.hero) {
+                continue;
+            }
 
+            if ((!(child instanceof GameObject)) && (child.tag != kGameObjectTag)) {
+                continue;
+            }
+
+            const maxVisibilityDistance = 372.0;
+            const fullVisibilityDistance = 128.0;
+            var distance = cc.pLength(cc.pSub(this.hero.getPosition(), child.getPosition()));
+            if (distance - fullVisibilityDistance >= maxVisibilityDistance) {
+                if (child.setOpacity) {
+                    child.setOpacity(0);
+                }
+            }
+            else if (distance > fullVisibilityDistance) {
+                var k = (distance - fullVisibilityDistance)/(maxVisibilityDistance);
+                k = k <= 1 ? k : 1;
+                if (child.setOpacity) {
+                    child.setOpacity((1 - k)*255);
+                }
+            }
+            else {
+                if (child.setOpacity) {
+                    child.setOpacity(255);
+                }
+                if (child instanceof GameObject && child.isActive) {
+                    this.heroInteractWith(child);
+                }
+            }
+        }
+    },
+
+    update:function(dt) {
         if (this.isDead || this.isPaused) {
             return;
         }
 
-        var d = heroSpeed*dt;
+        this.countdown -= dt;
+        if (this.countdown <= 0) {
+            this.die();
+
+            return;
+        }
+
+        var d = kHeroSpeed*dt;
         var dp = null;
         switch (this.heroDirection)
         {
@@ -543,31 +634,7 @@ Game = cc.Layer.extend({
             this.hero.setOpacity((1 - (dist/maxDist)*0.9)*255);
         }
 
-        for (var i = 0; i < this.getChildrenCount(); i++) {
-            var child = this.getChildren()[i];
-            if (child == this.hero) {
-                continue;
-            }
-
-            const maxVisibilityDistance = 372.0;
-            const fullVisibilityDistance = 128.0;
-            var distance = cc.pLength(cc.pSub(this.hero.getPosition(), child.getPosition()));
-            if (distance - fullVisibilityDistance >= maxVisibilityDistance) {
-                child.setOpacity(0);
-            }
-            else if (distance > fullVisibilityDistance) {
-                var k = (distance - fullVisibilityDistance)/(maxVisibilityDistance);
-                k = k <= 1 ? k : 1;
-                child.setOpacity((1 - k)*255);
-            }
-            else {
-                child.setOpacity(255);
-                if (child instanceof GameObject && child.isActive) {
-                    this.heroInteractWith(child);
-                }
-            }
-        }
-
+        this.updateObjects();
         this.updateLayersPosition();
     }
 });

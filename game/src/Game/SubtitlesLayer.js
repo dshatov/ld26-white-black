@@ -73,7 +73,6 @@ SubtitlesLayer = cc.Layer.extend({
         {
             case GameObject.type_foursquare: {
                 var voice = window["e_voice_foursquare_" + randomIntBetween(0, 1)];
-                cc.log(voice);
                 cc.AudioEngine.getInstance().playEffect(voice);
             } break;
 
