@@ -189,7 +189,8 @@ Game = cc.Layer.extend({
         for (var i = 1; i < vertices.length; i++) {
             if (randomIntBetween(0, 5) != 0
                 || (vertices[i].x == 0 && vertices[i].y == 0)
-                || (vertices[i].x == tp.x && vertices[i].y == tp.y)) {
+                || (vertices[i].x == tp.x && vertices[i].y == tp.y))
+            {
                 continue;
             }
 
