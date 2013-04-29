@@ -6,7 +6,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-const kDebugDrawTurnedOn = false;
+var kDebugDrawTurnedOn = false;
 
 const zOrder = {
     fadeLayer: 5,
@@ -88,9 +88,7 @@ Game = cc.Layer.extend({
         DynamicHell.createMap(64, 64);
         this.generateLevel();
 
-        if (kDebugDrawTurnedOn == true) {
-            this.initMapDebugDraw();
-        }
+        this.initMapDebugDraw();
         this.initSmallMapDebugDraw();
 
         this.updateObjects();
@@ -221,11 +219,13 @@ Game = cc.Layer.extend({
             context.lineWidth = 2;
 //            context.globalAlpha = 0.25;
 
-            var segments = DynamicHell.getListOfSegments();
-            for (var i = 0; i < segments.length; i++) {
-                var seg = segments[i];
-                cc.drawingUtil.drawLine(cc.p(seg.first.x*levelScale, seg.first.y*levelScale),
-                                        cc.p(seg.last.x*levelScale, seg.last.y*levelScale));
+            if (kDebugDrawTurnedOn == true) {
+                var segments = DynamicHell.getListOfSegments();
+                for (var i = 0; i < segments.length; i++) {
+                    var seg = segments[i];
+                    cc.drawingUtil.drawLine(cc.p(seg.first.x*levelScale, seg.first.y*levelScale),
+                                            cc.p(seg.last.x*levelScale, seg.last.y*levelScale));
+                }
             }
         }
     },
@@ -436,9 +436,10 @@ Game = cc.Layer.extend({
                 this.heroDirection = evt;
             } break;
 
-//            case cc.KEY.r: { // restart
+            case cc.KEY.r: {
+                kDebugDrawTurnedOn = !kDebugDrawTurnedOn;
 //                this.nextLevel();
-//            } break;
+            } break;
 
             case cc.KEY.q: { // exit to main menu
                 this.isPaused = true;
