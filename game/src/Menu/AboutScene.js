@@ -39,22 +39,27 @@ var About = cc.Layer.extend({
     },
 
     createPage: function() {
-       var sp = {x: 470, y: 400}, cursopposition, that = this;
-
-        var label = cc.LabelTTF.create("This is a game about existential suffering of foursquare.", "Arial", 32);
+        var label = cc.LabelTTF.create("This is a game about foursquare and his existential suffering.", "Arial", 32);
         label.setColor(kItemColor);
-        label.setPosition(kScreenCenter);
+        label.setPosition(kScreenCenter.x, kScreenHeight - 72.0);
         this.addChild(label);
-        /*
-        developers.forEach(function(el) {
-            var developer = cc.LabelTTF.create(el);
-            sp = {x: sp.x,y: sp.y-50};
-            developer.setPosition(sp);
-            developer.setColor(kItemColor);
-            developer.setFontSize(30);
-            that.addChild(developer);
-        });
-        */
+
+        var howtoLabels = [
+            cc.LabelTTF.create("Use arrows for moving foursquare.", "Arial", 32),
+            cc.LabelTTF.create("If foursquare become transparent you will lose.", "Arial", 32),
+            cc.LabelTTF.create("You should find a way to fill the foursquare.", "Arial", 32),
+            cc.LabelTTF.create("Do be quick!", "Arial", 32),
+        ];
+
+        const spaceY = 8.0;
+        const fullHeight = label.getContentSize().height*(howtoLabels.length) + spaceY*(howtoLabels.length - 1);
+        for (var i = 0; i < howtoLabels.length; i++) {
+            label = howtoLabels[i];
+//            label.setAnchorPoint(0.5, 1);
+            label.setColor(kItemColor);
+            label.setPosition(kScreenCenter.x, kScreenCenter.y + fullHeight/2 - i*(label.getContentSize().height + spaceY));
+            this.addChild(label);
+        }
     }
 });
 
