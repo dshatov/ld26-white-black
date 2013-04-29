@@ -25,7 +25,7 @@ var About = cc.Layer.extend({
 
         this.createPage();
 
-        var backButton = cc.MenuItemFont.create("main menu", this.mainMenu, this);
+        var backButton = cc.MenuItemFont.create("PLAY", this.mainMenu, this);
         backButton.setColor(kItemColor);
         menu.addChild(backButton);
     },
@@ -33,7 +33,7 @@ var About = cc.Layer.extend({
     mainMenu: function() {
         ccDirector.replaceScene(
             cc.TransitionFade.create(
-                1.0, MainMenuScene.create(), kBackgroundColor
+                1.0, GameScene.create(), kBackgroundColor
             )
         )
     },

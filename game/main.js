@@ -107,4 +107,4 @@ cocos2dApp = cc.Application.extend({
         return true;
     }
 });
-var myApp = new cocos2dApp(MainMenuScene);
+var myApp = new cocos2dApp(AboutScene);
