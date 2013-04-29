@@ -44,7 +44,12 @@ SubtitlesLayer = cc.Layer.extend({
             this.replyLabel.stopAllActions();
             this.replyLabel.setOpacity(0);
             this.replyLabel.setString(replyText);
-            this.replyLabel.setColor(kItemColor);
+            if (kItemColor == kColorBlack) {
+                this.replyLabel.setColor(cc.c3b(50, 50, 50));
+            }
+            else {
+                this.replyLabel.setColor(cc.c3b(205, 205, 205));
+            }
             var gameobjectPos = cc.pAdd(gameobject.getPosition(), gameobject.getParent().getPosition());
             this.replyLabel.setPosition(gameobjectPos.x,
                 gameobjectPos.y + gameobject.getContentSize().height/2 + this.replyLabel.getContentSize().height + 16.0);
@@ -60,7 +65,12 @@ SubtitlesLayer = cc.Layer.extend({
         this.subtitleLabel.stopAllActions();
         this.subtitleLabel.setOpacity(0);
         this.subtitleLabel.setString(text);
-        this.subtitleLabel.setColor(kItemColor);
+        if (kItemColor == kColorBlack) {
+            this.subtitleLabel.setColor(cc.c3b(55, 55, 55));
+        }
+        else {
+            this.subtitleLabel.setColor(cc.c3b(200, 200, 200));
+        }
         this.subtitleLabel.runAction(
             cc.Sequence.create(
                 cc.FadeTo.create(time*0.25, 255),

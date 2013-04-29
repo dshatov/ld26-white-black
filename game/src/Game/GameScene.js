@@ -179,7 +179,7 @@ Game = cc.Layer.extend({
         }
 
 
-        this.timePerLevel = (DynamicHell.getListOfSegments().length*levelScale/kHeroSpeed)*4;
+        this.timePerLevel = (DynamicHell.getListOfSegments().length*levelScale/kHeroSpeed)*2.5;
         cc.log("time per level: " + this.timePerLevel);
         this.countdown = this.timePerLevel;
 

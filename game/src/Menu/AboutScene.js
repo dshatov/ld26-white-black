@@ -25,7 +25,7 @@ var About = cc.Layer.extend({
 
         this.createPage();
 
-        var backButton = cc.MenuItemFont.create("back", this.mainMenu, this);
+        var backButton = cc.MenuItemFont.create("main menu", this.mainMenu, this);
         backButton.setColor(kItemColor);
         menu.addChild(backButton);
     },
@@ -49,6 +49,8 @@ var About = cc.Layer.extend({
             cc.LabelTTF.create("If foursquare become transparent you will lose.", "Arial", 32),
             cc.LabelTTF.create("You should find a way to fill the foursquare.", "Arial", 32),
             cc.LabelTTF.create("Do be quick!", "Arial", 32),
+            cc.LabelTTF.create(" ", "Arial", 32),
+            cc.LabelTTF.create("(we recommend you to use headphones)", "Arial", 32),
         ];
 
         const spaceY = 8.0;
