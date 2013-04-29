@@ -6,6 +6,8 @@
  * To change this template use File | Settings | File Templates.
  */
 
+const kDebugDrawTurnedOn = false;
+
 const zOrder = {
     fadeLayer: 5,
     subtitlesLayer: 4,
@@ -86,7 +88,9 @@ Game = cc.Layer.extend({
         DynamicHell.createMap(64, 64);
         this.generateLevel();
 
-//        this.initMapDebugDraw();
+        if (kDebugDrawTurnedOn == true) {
+            this.initMapDebugDraw();
+        }
         this.initSmallMapDebugDraw();
 
         this.updateObjects();
