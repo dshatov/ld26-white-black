@@ -385,7 +385,7 @@ Game = cc.Layer.extend({
 
                     this.removeChild(this.hero);
                     this.hero = GameObject.create(GameObject.type_foursquare, this.progress);
-                    this.addChild(this.hero);
+                    this.addChild(this.hero, zOrder.hero);
                     this.heroPulse();
 
                     this.background.setColor(kBackgroundColor);
