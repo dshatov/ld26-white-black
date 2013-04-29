@@ -437,7 +437,7 @@ Game = cc.Layer.extend({
             } break;
 
             case cc.KEY.r: {
-                kDebugDrawTurnedOn = !kDebugDrawTurnedOn;
+//                kDebugDrawTurnedOn = !kDebugDrawTurnedOn;
 //                this.nextLevel();
             } break;
 
