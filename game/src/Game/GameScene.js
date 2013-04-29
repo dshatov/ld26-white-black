@@ -558,7 +558,10 @@ Game = cc.Layer.extend({
                 "become a circle or die",
                 "you will not find anything here",
                 "you existence is meaningless",
-                "you are useless"
+                "you are useless",
+                "we will find them before you",
+                "you will die alone and empty here",
+                "you will remain empty"
             ];
 
             var eggs = [
@@ -567,7 +570,7 @@ Game = cc.Layer.extend({
             ];
 
             var text = null;
-            if (randomIntBetween(0, 50) != 0) {
+            if (randomIntBetween(0, 30) != 0) {
                 text = replies[Math.floor(Math.random() * replies.length)];
             }
             else {
