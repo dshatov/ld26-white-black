@@ -39,7 +39,7 @@ var About = cc.Layer.extend({
     },
 
     createPage: function() {
-        var label = cc.LabelTTF.create("This is a game about foursquare and his existential suffering.", "Arial", 32);
+        var label = cc.LabelTTF.create("This is a game about the Foursquare and his existential suffering.", "Arial", 32);
         label.setColor(kItemColor);
         label.setPosition(kScreenCenter.x, kScreenHeight - 72.0);
         this.addChild(label);
