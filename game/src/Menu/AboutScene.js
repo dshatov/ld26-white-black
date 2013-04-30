@@ -46,7 +46,7 @@ var About = cc.Layer.extend({
 
         var howtoLabels = [
             cc.LabelTTF.create("Use arrows for moving foursquare.", "Arial", 32),
-            cc.LabelTTF.create("If foursquare become transparent you will lose.", "Arial", 32),
+            cc.LabelTTF.create("If foursquare will become transparent you will lose.", "Arial", 32),
             cc.LabelTTF.create("You should find a way to fill the foursquare.", "Arial", 32),
             cc.LabelTTF.create("Do be quick!", "Arial", 32),
             cc.LabelTTF.create(" ", "Arial", 32),
