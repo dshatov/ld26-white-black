@@ -45,12 +45,12 @@ var About = cc.Layer.extend({
         this.addChild(label);
 
         var howtoLabels = [
-            cc.LabelTTF.create("Use arrows for moving foursquare.", "Arial", 32),
-            cc.LabelTTF.create("If foursquare will become transparent you will lose.", "Arial", 32),
-            cc.LabelTTF.create("You should find a way to fill the foursquare.", "Arial", 32),
+            cc.LabelTTF.create("Use arrows for moving the Foursquare.", "Arial", 32),
+            cc.LabelTTF.create("If the Foursquare will become transparent you will lose.", "Arial", 32),
+            cc.LabelTTF.create("You should find a way to fill the Foursquare.", "Arial", 32),
             cc.LabelTTF.create("Do be quick!", "Arial", 32),
             cc.LabelTTF.create(" ", "Arial", 32),
-            cc.LabelTTF.create("(we recommend you to use headphones)", "Arial", 32),
+            cc.LabelTTF.create("(we recommended you to use headphones)", "Arial", 32),
         ];
 
         const spaceY = 8.0;
