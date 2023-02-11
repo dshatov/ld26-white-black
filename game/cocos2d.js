@@ -53,7 +53,7 @@
             'src/Game/GhostManager.js'
         ]
     };
-    window.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener('click', function () {
         //first load engine file if specified
         var s = d.createElement('script');
         /*********Delete this section if you have packed all files into one*******/
@@ -74,5 +74,5 @@
         document.ccConfig = c;
         s.id = 'cocos2d-html5';
         //else if single file specified, load singlefile
-    });
+    }, {once: true});
 })();
